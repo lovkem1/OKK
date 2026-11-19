@@ -4,7 +4,7 @@ plugins {
 }
 android {
     namespace = "com.OKK.yes.loader"
-    compileSdk = 37
+    compileSdk = 36
     defaultConfig {
         minSdk = 26
         // 定制版：允许自定义签名注入（默认 false，本定制版在 gradle.properties 打开）

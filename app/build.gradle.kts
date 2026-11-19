@@ -13,11 +13,11 @@ val hasReleaseSigning = releaseStoreFilePath != null &&
 
 android {
     namespace = "com.OKK.yes"
-    compileSdk = 37
+    compileSdk = 36
     defaultConfig {
         applicationId = "com.OKK.yes"
         minSdk = 26
-        targetSdk = 37
+        targetSdk = 36
         versionCode = 18
         versionName = "1.2.6"
         // 真机主流 arm64；去掉 x86 模拟器 so 减小体积
