@@ -4,11 +4,11 @@ plugins {
 
 android {
     namespace = "com.OKK.yes.monitor"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig {
         applicationId = "com.OKK.yes.monitor"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0.0"
     }

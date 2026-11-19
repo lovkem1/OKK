@@ -9,6 +9,7 @@ import com.OKK.yes.core.hooks.AntiRevokeHook
 import com.OKK.yes.core.hooks.DisableHotUpdateHook
 import com.OKK.yes.core.hooks.DownloadRedirectHook
 import com.OKK.yes.core.hooks.HomeDrawerBridge
+import com.OKK.yes.core.startup.FeatureHookRegistry
 import com.OKK.yes.loader.ui.OKKSettingsDialog
 import de.robv.android.xposed.XposedBridge
 import java.util.concurrent.atomic.AtomicBoolean
