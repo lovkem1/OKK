@@ -15,6 +15,7 @@ import de.robv.android.xposed.XposedBridge
  * - play72  8.0.72 / 3083
  * - cn74    8.0.74 / 3120
  * - cn76    8.0.76 / 3140
+ * - cn79    8.0.79 / (定制版目标版本，走 dex 特征兜底识别渠道)
  */
 data class WeChatVersion(
     val versionName: String,
@@ -35,7 +36,7 @@ data class WeChatVersion(
         patch = p.third
     }
 
-    /** 主适配区间：8.0.69 ～ 8.0.76（含国服 / Play） */
+    /** 主适配区间：8.0.69 ～ 8.0.79（含国服 / Play） */
     val inPrimaryRange: Boolean
         get() = major == 8 && minor == 0 && patch in MIN_PATCH..MAX_PATCH
 
@@ -52,8 +53,8 @@ data class WeChatVersion(
 
     companion object {
         const val MIN_PATCH = 69
-        const val MAX_PATCH = 76
-        const val PRIMARY_RANGE_LABEL = "微信 8.0.69–8.0.76（国服 / Play）"
+        const val MAX_PATCH = 79
+        const val PRIMARY_RANGE_LABEL = "微信 8.0.69–8.0.79（国服 / Play）"
 
         private const val TAG = "OKK-WxVer"
 

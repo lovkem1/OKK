@@ -24,6 +24,14 @@ object LegitCheck {
     private const val EXPECTED_SHA256 =
         "58952704A74D496BF4C008DA7974725D049B04A827CE208C84885A4F260324B6"
 
+    /** 构建时注入：是否放行自定义签名（见 loader/build.gradle.kts + gradle.properties） */
+    private val ALLOW_CUSTOM_SIGNATURE: Boolean =
+        runCatching { com.OKK.yes.loader.BuildConfig.ALLOW_CUSTOM_SIGNATURE }.getOrDefault(false)
+
+    /** 构建时注入：可信自定义证书 SHA256（可空） */
+    private val customSha: String =
+        runCatching { com.OKK.yes.loader.BuildConfig.CUSTOM_SIGN_SHA256 }.getOrDefault("")
+
     @Volatile
     private var cachedResult: Boolean? = null
 
@@ -52,11 +60,22 @@ object LegitCheck {
                 true
             }
             readResult.equals(EXPECTED_SHA256, ignoreCase = true) -> {
-                xlog("signature MATCH sha256=$readResult")
+                xlog("signature MATCH official sha256=$readResult")
+                true
+            }
+            customSha.isNotBlank() &&
+                readResult.equals(customSha, ignoreCase = true) -> {
+                // 精确匹配构建时配置的可信自定义证书
+                xlog("signature MATCH custom sha256=$readResult")
+                true
+            }
+            ALLOW_CUSTOM_SIGNATURE -> {
+                // 定制版：允许用自定义证书签名后仍能注入（方便本地重编译使用）
+                xlog("signature not official but custom signatures allowed -> allow sha256=$readResult")
                 true
             }
             else -> {
-                // 能读到签名但不匹配 -> 判定为重签，拦截
+                // 能读到签名但不匹配，且未放行自定义 -> 判定为重签，拦截
                 xlog("signature MISMATCH got=$readResult -> block")
                 false
             }

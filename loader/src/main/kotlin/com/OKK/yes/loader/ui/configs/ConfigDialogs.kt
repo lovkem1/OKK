@@ -509,7 +509,7 @@ fun AntiRevokeConfigDialog(onDismiss: () -> Unit) {
     val context = LocalContext.current
     ConfigDialog(title = "防撤回设置", onDismiss = onDismiss) {
         ConfigSwitch(title = "显示撤回提示", summary = "在聊天中追加系统撤回提示文案", key = "revoke_notice_enabled", default = true)
-        ConfigSwitch(title = "保留自己撤回", summary = "自己撤回的消息也同样拦截保存", key = "anti_revoke_keep_self", default = false)
+        ConfigSwitch(title = "保留自己撤回", summary = "自己撤回的消息也同样拦截保存", key = "anti_revoke_keep_self", default = true)
 
         ConfigSectionLabel("撤回提示模板 (参考 WA 预设与变量)")
         ConfigTextFieldWithChips(

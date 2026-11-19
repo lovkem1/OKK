@@ -4,7 +4,7 @@ data class AppFeatureOptions(
     val antiRevoke: Boolean = true,
     val revokeNotice: Boolean = true,
     /** anti_recall_keep_self：自己撤回的消息是否也拦截保留 */
-    val keepSelfRevoke: Boolean = false,
+    val keepSelfRevoke: Boolean = true,
     /** anti_recall_notice_text，变量 {name} {content} */
     val revokeNoticeTemplate: String = "{name}撤回了一条消息",
     val mediaProtect: Boolean = true,
@@ -47,7 +47,7 @@ object AppFeatureConfig {
         cached = AppFeatureOptions(
             antiRevoke = cfgBool("anti_revoke", true),
             revokeNotice = cfgBool("revoke_notice_enabled", true),
-            keepSelfRevoke = cfgBool("anti_revoke_keep_self", false),
+            keepSelfRevoke = cfgBool("anti_revoke_keep_self", true),
             revokeNoticeTemplate = cfgStr(
                 "anti_revoke_notice_text",
                 "{name}撤回了一条消息"

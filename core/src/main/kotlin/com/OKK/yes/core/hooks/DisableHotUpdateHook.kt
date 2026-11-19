@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * - `com.tencent.tinker.loader.shareutil.ShareTinkerInternals`
  * - `isTinkerEnabled` / `isTinkerEnabledAll` / `isTinkerEnabledForDex` 等
  *
- * 配置：`disable_hot_update` 默认 false
+ * 配置：`disable_hot_update` 默认 true（定制版）
  */
 object DisableHotUpdateHook {
     private const val TAG = "OKK-HotUpdate"
@@ -54,7 +54,7 @@ object DisableHotUpdateHook {
     }
 
     fun isEnabled(): Boolean =
-        runCatching { PublicConfigStore.getBoolean(KEY, false) }.getOrDefault(false)
+        runCatching { PublicConfigStore.getBoolean(KEY, true) }.getOrDefault(true)
 
     private fun hookTinkerFlags(classLoader: ClassLoader) {
         runCatching {

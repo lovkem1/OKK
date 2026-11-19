@@ -32,7 +32,17 @@ object AntiMomentsDeleteHook {
     private val dexKitNativeLoaded = AtomicBoolean(false)
     private val dexKitAttempted = AtomicBoolean(false)
 
+    private const val KEY = "anti_moments_delete"
+
+    /** 定制版：朋友圈防删除默认开启，可在设置内关闭 */
+    fun isEnabled(): Boolean =
+        runCatching { PublicConfigStore.getBoolean(KEY, true) }.getOrDefault(true)
+
     fun install(context: Context, classLoader: ClassLoader, modulePath: String? = null) {
+        if (!isEnabled()) {
+            xlog("disabled by config, skip install")
+            return
+        }
         if (!installed.compareAndSet(false, true)) return
 
         xlog("install requested from ${context.javaClass.name}")

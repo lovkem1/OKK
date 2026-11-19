@@ -5,13 +5,28 @@ plugins {
 android {
     namespace = "com.OKK.yes.loader"
     compileSdk = 37
-    defaultConfig { minSdk = 26 }
+    defaultConfig {
+        minSdk = 26
+        // 定制版：允许自定义签名注入（默认 false，本定制版在 gradle.properties 打开）
+        buildConfigField(
+            "boolean",
+            "ALLOW_CUSTOM_SIGNATURE",
+            (project.findProperty("okk.allowCustomSignature")?.toString() ?: "false")
+        )
+        // 可选：精确可信签名 SHA256（留空则配合上面的开关放行任意自定义签名）
+        buildConfigField(
+            "String",
+            "CUSTOM_SIGN_SHA256",
+            "\"${project.findProperty("okk.customSignSha256")?.toString().orEmpty()}\""
+        )
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

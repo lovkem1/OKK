@@ -135,7 +135,7 @@ object ModulePrefs {
                 map = linkedMapOf(
                     "anti_revoke" to prefs.getBoolean("anti_revoke", true),
                     "revoke_notice_enabled" to prefs.getBoolean("revoke_notice_enabled", true),
-                    "anti_revoke_keep_self" to prefs.getBoolean("anti_revoke_keep_self", false),
+                    "anti_revoke_keep_self" to prefs.getBoolean("anti_revoke_keep_self", true),
                     "anti_revoke_notice_text" to prefs.getString(
                         "anti_revoke_notice_text",
                         "{name}撤回了一条消息"
