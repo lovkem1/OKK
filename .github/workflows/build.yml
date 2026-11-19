@@ -46,10 +46,15 @@ jobs:
           sdkmanager --list_installed | grep -E "platforms;android-36|build-tools;36" || true
 
       - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
+        run: chmod +x ./gradlew || true
+
+      - name: Setup Gradle 9.6.1 (wrapper jar 缺失，直接用发行版)
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '9.6.1'
 
       - name: Build debug APK
-        run: ./gradlew :app:assembleDebug --no-daemon --stacktrace
+        run: gradle :app:assembleDebug --no-daemon --stacktrace
 
       - name: Locate and rename APK
         run: |
