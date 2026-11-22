@@ -1,0 +1,62 @@
+{
+  "wechat_version": "8.0.79",
+  "_comment": "仅构建期使用：用字符串锚点定位微信混淆类/方法，产物 descriptors.bin 不携带这些字符串。微信升级后重新运行本工具即可。",
+  "anchors": [
+    {
+      "key": "doRevoke",
+      "strings": ["doRevokeMsg xmlSrvMsgId=%d talker=%s isGet=%s"],
+      "note": "撤回源头方法"
+    },
+    {
+      "key": "sendTip",
+      "strings": ["check table name from id:%d table:%s getTableNameByLocalId:%s"],
+      "note": "消息入库/提示方法"
+    },
+    {
+      "key": "vfs",
+      "strings": ["VFS.NativeFileSystem", "Cannot create directory"],
+      "requires_all": false,
+      "note": "媒体文件保护"
+    },
+    {
+      "key": "snsDbUpdate",
+      "strings": ["com.tencent.mm.plugin.sns.storage.SnsSqliteDB", "update"],
+      "requires_all": false,
+      "class_hint": "sns",
+      "note": "朋友圈 DB update"
+    },
+    {
+      "key": "snsDbRawQuery",
+      "strings": ["com.tencent.mm.plugin.sns.storage.SnsSqliteDB", "rawQuery"],
+      "requires_all": false,
+      "class_hint": "sns",
+      "note": "朋友圈 DB rawQuery"
+    },
+    {
+      "key": "snsDbExecSql",
+      "strings": ["com.tencent.mm.plugin.sns.storage.SnsSqliteDB", "execSQL"],
+      "requires_all": false,
+      "class_hint": "sns",
+      "note": "朋友圈 DB execSQL"
+    },
+    {
+      "key": "snsDbDelete",
+      "strings": ["com.tencent.mm.plugin.sns.storage.SnsSqliteDB", "delete"],
+      "requires_all": false,
+      "class_hint": "sns",
+      "note": "朋友圈 DB delete"
+    },
+    {
+      "key": "deleteComment",
+      "strings": ["deleteComment", "com.tencent.mm.plugin.sns.storage.SnsCommentStorage"],
+      "requires_all": false,
+      "note": "朋友圈评论删除"
+    },
+    {
+      "key": "deleteBySnsId",
+      "strings": ["deleteBySnsId", "com.tencent.mm.plugin.sns.storage.SnsCommentStorage"],
+      "requires_all": false,
+      "note": "朋友圈按 snsId 删除评论"
+    }
+  ]
+}

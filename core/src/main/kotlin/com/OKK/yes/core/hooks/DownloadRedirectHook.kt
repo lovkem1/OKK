@@ -137,20 +137,39 @@ object DownloadRedirectHook {
         return null
     }
 
-    // ── 1. ScopedStorageUtil（u6.c）：微信 8.0.76 保存文件到公共目录的核心入口 ──
-    // u6.c(Context, src, dest, Uri, y6) -> boolean
+    // ── 1. ScopedStorageUtil 保存入口 ──
+    // 8.0.76: u6.c(Context, src, dest, Uri, y6) -> boolean
+    // 8.0.79: v6.c(Context, src, dest, Uri, z6) -> boolean（类重命名 u6→v6，末参数 y6→z6）
+    // 两个版本都尝试，末参数类型不写死（只校验前 3 参 + 第 4 参 Uri），提升跨版本兼容。
     private fun locateAndHookScopedStorageUtil(cl: ClassLoader) {
+        // 类名密文：v6（8.0.79）优先，u6（8.0.76）兜底
+        val classCandidates = listOf(
+            "hSwCwDZD3C5BwTVKxztAw3RH1ykC3jcCxzRJ0DRJx3RB3Dk=" to "v6(8.0.79)",
+            "hS8CwDZD3C5BwTVKxztAw3RH1ykC3jcCxzRJ0DRJx3RB3Dk=" to "u6(8.0.76)"
+        )
         runCatching {
-            val clazz = Class.forName(com.OKK.yes.core.common.SecureStrings.d("hS8CwDZD3C5BwTVKxztAw3RH1ykC3jcCxzRJ0DRJx3RB3Dk="), false, cl)
+            var clazz: Class<*>? = null
+            var hitLabel = ""
+            for ((enc, label) in classCandidates) {
+                val c = runCatching {
+                    Class.forName(com.OKK.yes.core.common.SecureStrings.d(enc), false, cl)
+                }.getOrNull()
+                if (c != null) { clazz = c; hitLabel = label; break }
+            }
+            if (clazz == null) {
+                xlog("ScopedStorageUtil class not found (tried v6/u6)")
+                return
+            }
             val m = clazz.declaredMethods.firstOrNull { cand ->
                 cand.returnType == Boolean::class.javaPrimitiveType &&
                     cand.parameterCount == 5 &&
                     cand.parameterTypes.getOrNull(0)?.name == "android.content.Context" &&
                     cand.parameterTypes.getOrNull(1)?.name == "java.lang.String" &&
-                    cand.parameterTypes.getOrNull(2)?.name == "java.lang.String"
+                    candidateIsStringOrCharSequence(cand.parameterTypes.getOrNull(2)) &&
+                    candidateIsUri(cand.parameterTypes.getOrNull(3))
             }
             if (m == null) {
-                xlog("ScopedStorageUtil.c not found")
+                xlog("ScopedStorageUtil.c not found in $hitLabel")
                 return
             }
             scopedStorageHooked.set(true)
@@ -210,6 +229,14 @@ object DownloadRedirectHook {
             xlog("hooked ScopedStorageUtil.c ${clazz.name}.${m.name}")
         }.onFailure { xlog("locate ScopedStorageUtil fail: ${it.message}") }
     }
+
+    /** 第 2 个 src 参数历史上是 String，个别版本可能是 CharSequence，放宽校验 */
+    private fun candidateIsStringOrCharSequence(t: Class<*>?): Boolean =
+        t == String::class.java || t == CharSequence::class.java
+
+    /** 第 4 个参数是 SAF 的 Uri；个别版本可能声明为其子类，按 isAssignableFrom 判断 */
+    private fun candidateIsUri(t: Class<*>?): Boolean =
+        t != null && Uri::class.java.isAssignableFrom(t)
 
     // ── 配置 ─────────────────────────────────────────────────────────────────
 

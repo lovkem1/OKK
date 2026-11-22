@@ -1,0 +1,26 @@
+{
+  "wechat_version": "8.0.79",
+  "resolved": [
+    {
+      "key": "doRevoke",
+      "descriptor": "Lcom/tencent/mm/ui/chatting/component/v2;->w0()V",
+      "class_name": "com/tencent/mm/ui/chatting/component/v2",
+      "method_name": "w0",
+      "signature": "()V",
+      "code_hash": "63ddade0",
+      "dex": "classes11.dex",
+      "note": "撤回源头方法"
+    }
+  ],
+  "ambiguous": {},
+  "missing": [
+    "sendTip",
+    "vfs",
+    "snsDbUpdate",
+    "snsDbRawQuery",
+    "snsDbExecSql",
+    "snsDbDelete",
+    "deleteComment",
+    "deleteBySnsId"
+  ]
+}
