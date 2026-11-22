@@ -37,7 +37,7 @@ class TargetTable private constructor(
         private fun decrypt(payload: ByteArray, version: String): ByteArray {
             val crc = CRC32()
             crc.update(version.toByteArray(StandardCharsets.UTF_8))
-            val seed = (crc.value.toInt() xor 0xA5A5A5A5) and 0xFF
+            val seed = (crc.value.toInt() xor 0xA5A5A5A5.toInt()) and 0xFF
             val out = ByteArray(payload.size)
             for (i in payload.indices) {
                 out[i] = (payload[i].toInt() xor ((seed + i * 31) and 0xFF)).toByte()
