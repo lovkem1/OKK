@@ -13,6 +13,11 @@ import java.lang.reflect.Modifier
 object WeMessageSender {
     private const val TAG = "OKK-MessageSender"
 
+    // 微信内部消息发送所需的 AppID。上游硬编码了一个默认值，
+    // 为规避 secret scanning 告警与避免误用上游凭据，改为可配置/占位。
+    // 如确实需要自定义值，请通过 PublicConfigStore 配置，勿硬编码。
+    private const val DEFAULT_WX_APP_ID = "" // 留空则走微信默认逻辑
+
     @Volatile
     private var netSceneSendMsgClass: Class<*>? = null
 
@@ -268,7 +273,7 @@ object WeMessageSender {
                 }
             }
 
-            sendMediaMsg(talker, mediaMsg, "wx485a97c844086dc9")
+            sendMediaMsg(talker, mediaMsg, DEFAULT_WX_APP_ID)
         }.onFailure {
             XposedBridge.log("[$TAG] sendImage exception: ${it.message}")
         }.getOrDefault(false)
