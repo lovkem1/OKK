@@ -1,3 +1,16 @@
+> ## ⚠️ 开源二次修改版（Non-Official Fork）
+>
+> 本仓库是 **[vip772/OKK](https://github.com/vip772/OKK)** 的**开源二次修改版**，由 **lovkem1** 独立维护，与原作者及官方项目**无关联**。
+>
+> | 项目 | 说明 |
+> |---|---|
+> | 上游来源 | [vip772/OKK](https://github.com/vip772/OKK)（Apache-2.0 / 以原仓库 LICENSE 为准） |
+> | 修改者 | lovkem1（二改维护者） |
+> | 本版定位 | 适配微信 8.0.79、修复存储重定向、放行自定义签名、保留上游全部功能 |
+> | 定制说明 | 详见 [定制说明.md](定制说明.md) |
+>
+> 问题与反馈请提本仓库 Issue，**不要**打扰上游作者。
+
 <p align="center">
   <img src="./app/src/main/res/drawable/ic_launcher.png" width="108" height="108" alt="OKK Logo">
 </p>
