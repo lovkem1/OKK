@@ -1,21 +1,21 @@
 # OKK release：R8 压缩 + 混淆
 # 仅保留对外入口与反射/JNI 边界，其余可裁剪混淆
 # LSPosed / Xposed 入口（assets/xposed_init、meta-data 写死类名
--keep class com.OKK.yes.loader.HookEntry {
+-keep class io.github.lovkem1.okk.loader.HookEntry {
     public <init>();
     public *;
 }
--keep class com.OKK.yes.loader.ZygoteEntry {
+-keep class io.github.lovkem1.okk.loader.ZygoteEntry {
     public <init>();
     public *;
 }
--keep class com.OKK.yes.loader.ModernHookEntry {
+-keep class io.github.lovkem1.okk.loader.ModernHookEntry {
     public <init>();
     public *;
 }
 
 # 诊断日志区运行时写入，勿整类删掉
--keep class com.OKK.yes.core.hooks.ModuleLog {
+-keep class io.github.lovkem1.okk.core.hooks.ModuleLog {
     public *;
 }
 
@@ -29,7 +29,7 @@
 
 
 # 脚本暴露的 API 及模型类
--keep class com.OKK.yes.core.hooks.plugins.** { *; }
+-keep class io.github.lovkem1.okk.core.hooks.plugins.** { *; }
 
 # 脚本依赖的第三方库 (BeanShell 动态调用)
 -keep class com.alibaba.fastjson2.** { *; }

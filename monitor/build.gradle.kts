@@ -3,10 +3,10 @@ plugins {
 }
 
 android {
-    namespace = "com.OKK.yes.monitor"
+    namespace = "io.github.lovkem1.okk.monitor"
     compileSdk = 37
     defaultConfig {
-        applicationId = "com.OKK.yes.monitor"
+        applicationId = "io.github.lovkem1.okk.monitor"
         minSdk = 26
         targetSdk = 37
         versionCode = 1

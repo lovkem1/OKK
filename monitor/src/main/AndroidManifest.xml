@@ -11,16 +11,16 @@
         <meta-data android:name="xposedscope" android:resource="@array/xposedscope"/>
         <meta-data android:name="xposeddescription" android:value="@string/xposeddescription"/>
 
-        <activity android:name="com.OKK.yes.monitor.SettingsActivity" android:exported="true">
+        <activity android:name="io.github.lovkem1.okk.monitor.SettingsActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <activity-alias android:name="com.OKK.yes.monitor.SettingsActivity.Hide"
+        <activity-alias android:name="io.github.lovkem1.okk.monitor.SettingsActivity.Hide"
             android:label="HookMonitor" android:exported="true"
-            android:targetActivity="com.OKK.yes.monitor.SettingsActivity">
+            android:targetActivity="io.github.lovkem1.okk.monitor.SettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS"/>

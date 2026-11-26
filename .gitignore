@@ -29,3 +29,10 @@ _tmp_*/
 _fix_*/
 _patch_*/
 check*.py
+
+# 敏感与产物（本地构建/签名/文档）
+output/
+Release信息文档.md
+密钥管理文档.md
+release-okk.keystore
+_pub.json

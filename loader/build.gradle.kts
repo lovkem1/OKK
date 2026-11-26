@@ -3,7 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 android {
-    namespace = "com.OKK.yes.loader"
+    namespace = "io.github.lovkem1.okk.loader"
     compileSdk = 37
     defaultConfig {
         minSdk = 26

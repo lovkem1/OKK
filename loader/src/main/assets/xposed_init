@@ -1,2 +1,2 @@
-com.OKK.yes.loader.HookEntry
-com.OKK.yes.loader.ZygoteEntry
+io.github.lovkem1.okk.loader.HookEntry
+io.github.lovkem1.okk.loader.ZygoteEntry

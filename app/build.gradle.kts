@@ -12,10 +12,10 @@ val hasReleaseSigning = releaseStoreFilePath != null &&
     releaseKeyPassword != null
 
 android {
-    namespace = "com.OKK.yes"
+    namespace = "io.github.lovkem1.okk"
     compileSdk = 37
     defaultConfig {
-        applicationId = "com.OKK.yes"
+        applicationId = "io.github.lovkem1.okk"
         minSdk = 26
         targetSdk = 37
         versionCode = 18
