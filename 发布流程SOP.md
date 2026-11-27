@@ -124,6 +124,11 @@ LSPosed 模块仓库 App 的「主页」「源码」「协作者」**不读 GitH
 
 用 Contents API 创建/更新这些文件即可（push 权限足够，不需要 admin）。缺失时 App 里主页/源码/协作者栏目不显示。
 
+**「主页」与「源码」是两个独立字段**（2026-11-27 实测 module JSON 确认）：
+- `sourceUrl`（源码）← 收录仓 `SOURCE_URL` 文件，push 权限可改。
+- `homepageUrl`（主页）← **收录仓 GitHub 仓库设置里的 homepage 字段**，需要 **admin 权限**。维护者角色（maintain）用 REST PATCH 会返回伪装 404、GraphQL 返回 FORBIDDEN，无法代改。要改只能：① 用有 admin 权限的 token；② 维护者在网页 Settings 里手动填。
+- README 里贴链接只影响「自述文件」展示，不会改变 `homepageUrl`。
+
 ---
 
 ## 6. 官网收录确认
