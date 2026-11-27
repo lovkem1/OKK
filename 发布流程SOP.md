@@ -111,6 +111,19 @@ curl -s -X PATCH \
 
 仓库描述填模块显示名 `LOKK 微信全能体验增强模块`（用户指定 LOKK，非笔误）。
 
+### 5.4 收录仓元数据文件（决定 App 里的「主页/源码/协作者」显示）
+
+LSPosed 模块仓库 App 的「主页」「源码」「协作者」**不读 GitHub 仓库设置**（homepage 字段需 admin 权限，maintain 角色改不了），而是读收录仓根目录的约定文件：
+
+| 文件 | 作用 | 当前内容 |
+|---|---|---|
+| `SOURCE_URL` | 主页 + 源码链接 | `https://github.com/lovkem1/OKK` |
+| `SUMMARY` | 模块简介 | 微信全能体验增强模块… |
+| `SCOPE` | 作用域包名 JSON 数组 | `["com.tencent.mm"]` |
+| `ADDITIONAL_AUTHORS` | 协作者 JSON 数组 | `[{"type":"add","name":"lovkem1","link":"https://github.com/lovkem1"}]` |
+
+用 Contents API 创建/更新这些文件即可（push 权限足够，不需要 admin）。缺失时 App 里主页/源码/协作者栏目不显示。
+
 ---
 
 ## 6. 官网收录确认
