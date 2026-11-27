@@ -133,11 +133,15 @@ curl -s -X PATCH \
 | 签名 | 只用本地 `release-okk.keystore`；丢失无法对同包名覆盖升级 |
 | Token | classic token 用完立即吊销，不写入任何仓库文件 |
 | 敏感信息 | keystore、两份含密码文档、token 均不进公开仓库（已在 `.gitignore`） |
+| 推送方式二选一 | 源码仓推送统一走 API **或** git，二者混用会让本地/远端 commit 分叉、`git push` 被拒；分叉时用 API 上传并 `git reset --hard origin/main` 对齐 |
 
 ---
 
 ## 8. 版本记录
 
-| 版本 | tag | 包名 | 签名 | 收录仓 |
+| 版本 | 源码仓 tag | 收录仓 tag | 包名 | 签名 |
 |---|---|---|---|---|
-| 1.2.6 | `18-1.2.6` | io.github.lovkem1.okk | 正式（V2，SHA256 8ee9d514…） | 已建 Release + APK |
+| 1.2.6 | `v1.2.6` | `18-1.2.6` | io.github.lovkem1.okk | 正式（V2，SHA256 8ee9d514…） |
+
+> 源码仓用 `v` 前缀（历史惯例），收录仓用官方 `VersionCode-VersionName` 格式，两仓 tag 刻意不同。
+> 源码仓无发行版时不会发生"重复推送"——两仓各自独立建 Release，源码仓是源码+文档+源码版 APK，收录仓只放 README+同一份 APK。
