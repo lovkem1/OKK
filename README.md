@@ -30,7 +30,7 @@
   <a href="https://github.com/LSPosed/LSPosed"><img src="https://img.shields.io/badge/Framework-LSPosed%20%2F%20libxposed-blue.svg?style=flat-square" alt="Framework"></a>
   <a href="https://kotlinlang.org/"><img src="https://img.shields.io/badge/Language-Kotlin-purple.svg?style=flat-square&logo=kotlin" alt="Language"></a>
   <a href="https://github.com/matsushita-takeo/MIUIX-KMP"><img src="https://img.shields.io/badge/UI-Compose%20%26%20MIUIX-ff69b4.svg?style=flat-square" alt="UI Style"></a>
-  <a href="https://t.me/OKK_YES"><img src="https://img.shields.io/badge/Telegram-%E5%AE%98%E6%96%B9%E4%BA%A4%E6%B5%81%E7%BE%A4-2CA5E0.svg?style=flat-square&logo=telegram" alt="Telegram"></a>
+  <a href="https://t.me/LokkChat"><img src="https://img.shields.io/badge/Telegram-%E5%AE%98%E6%96%B9%E4%BA%A4%E6%B5%81%E7%BE%A4-2CA5E0.svg?style=flat-square&logo=telegram" alt="Telegram"></a>
 </p>
 
 <br>
@@ -174,6 +174,6 @@ OKK/
 
 ## 💬 交流反馈
 
-[Telegram 交流群](https://t.me/OKK_YES)
+[Telegram 交流群](https://t.me/LokkChat)
 
 <br>
