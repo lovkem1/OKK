@@ -22,7 +22,7 @@ object CompatReportStore {
     private const val TAG = "OKK-CompatStore"
     private const val MODULE_PKG = "io.github.lovkem1.okk"
     private const val WECHAT_PKG = "com.tencent.mm"
-    private const val MODULE_VER = "1.2.63"
+    private const val MODULE_VER = "1.2.65"
     private const val FILE_NAME = "compat_report.json"
     private const val SHOWN_FILE = "compat_dialog_shown.txt"
 

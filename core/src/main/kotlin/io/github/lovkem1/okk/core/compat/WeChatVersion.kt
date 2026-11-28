@@ -74,7 +74,20 @@ data class WeChatVersion(
         }
 
         fun resolve(context: Context): WeChatVersion {
-            cached?.let { return it }
+            cached?.let { c ->
+                // 后台 dex 扫描完成后会回写 cached；若这里已是确定渠道直接返回
+                if (c.channel != Channel.UNKNOWN) return c
+                // UNKNOWN 但扫描已有结果：立即用结果修正（无需等下次）
+                playDexCache?.let { scanned ->
+                    if (scanned != Channel.UNKNOWN) {
+                        val fixed = c.copy(channel = scanned)
+                        cached = fixed
+                        xlog("resolved channel from dex cache: ${fixed.summary()}")
+                        return fixed
+                    }
+                }
+                return c
+            }
             val pm = context.packageManager
             val pkg = context.packageName.takeIf { it == "com.tencent.mm" } ?: "com.tencent.mm"
             val info = runCatching {
@@ -141,8 +154,10 @@ data class WeChatVersion(
 
             // 3) 兜底：运行时扫描微信 APK 的 classes.dex 是否含 Google Play 计费特征
             //    （com.android.billingclient / com.android.vending.billing 仅在 Play 版存在）
-            //    在后台线程扫描，首次调用先返回 UNKNOWN，避免阻塞模块加载。
-            return detectPlayByDexAsync(context)
+            //    同步扫描一次并缓存：仅读前 4 个 dex 的字符串池，耗时几十毫秒。
+            //    必须同步——异步首次返回 UNKNOWN 会被 resolve() 永久缓存，
+            //    导致兼容报告所有探针被降级为 PARTIAL（渠道未识别）。
+            return detectPlayByDex(context)
         }
 
         /**
@@ -155,44 +170,43 @@ data class WeChatVersion(
         @Volatile
         private var playDexCache: Channel? = null
 
-        private fun detectPlayByDexAsync(context: Context): Channel {
+        private fun detectPlayByDex(context: Context): Channel {
             playDexCache?.let { return it }
-            // 后台线程扫描，首次返回 UNKNOWN
-            Thread {
-                try {
-                    var result: Channel = Channel.UNKNOWN
-                    val apkPath = runCatching {
-                        context.packageManager.getApplicationInfo("com.tencent.mm", 0).sourceDir
-                    }.getOrNull()
-                    if (!apkPath.isNullOrBlank()) {
-                        result = runCatching {
-                            val f = java.io.File(apkPath)
-                            if (!f.exists()) return@runCatching Channel.UNKNOWN
-                            java.util.zip.ZipFile(f).use { zf ->
-                                var found = false
-                                val headers = listOf("classes.dex", "classes2.dex", "classes3.dex", "classes4.dex")
-                                for (n in headers) {
-                                    val entry = zf.getEntry(n) ?: continue
-                                    val size = entry.size
-                                    if (size > 40L * 1024 * 1024) continue // 跳过超大 dex
-                                    val buf = ByteArray(size.toInt())
-                                    zf.getInputStream(entry).read(buf)
-                                    val s = String(buf, Charsets.ISO_8859_1)
-                                    if (s.contains("com/android/billingclient") ||
-                                        s.contains("com/android/vending/billing")
-                                    ) { found = true; break }
-                                }
-                                if (found) Channel.PLAY else Channel.CN
+            val result = try {
+                var channel: Channel = Channel.UNKNOWN
+                val apkPath = runCatching {
+                    context.packageManager.getApplicationInfo("com.tencent.mm", 0).sourceDir
+                }.getOrNull()
+                if (!apkPath.isNullOrBlank()) {
+                    channel = runCatching {
+                        val f = java.io.File(apkPath)
+                        if (!f.exists()) return@runCatching Channel.UNKNOWN
+                        java.util.zip.ZipFile(f).use { zf ->
+                            var found = false
+                            val headers = listOf("classes.dex", "classes2.dex", "classes3.dex", "classes4.dex")
+                            for (n in headers) {
+                                val entry = zf.getEntry(n) ?: continue
+                                val size = entry.size
+                                if (size > 40L * 1024 * 1024) continue // 跳过超大 dex
+                                val buf = ByteArray(size.toInt())
+                                zf.getInputStream(entry).read(buf)
+                                val s = String(buf, Charsets.ISO_8859_1)
+                                if (s.contains("com/android/billingclient") ||
+                                    s.contains("com/android/vending/billing")
+                                ) { found = true; break }
                             }
-                        }.getOrDefault(Channel.UNKNOWN)
-                    }
-                    playDexCache = result
-                    xlog("dex probe result=$result")
-                } catch (t: Throwable) {
-                    xlog("dex probe fail: ${t.message}")
+                            if (found) Channel.PLAY else Channel.CN
+                        }
+                    }.getOrDefault(Channel.UNKNOWN)
                 }
-            }.start()
-            return Channel.UNKNOWN
+                channel
+            } catch (t: Throwable) {
+                xlog("dex probe fail: ${t.message}")
+                Channel.UNKNOWN
+            }
+            playDexCache = result
+            xlog("dex probe result=$result")
+            return result
         }
 
         private fun xlog(msg: String) {

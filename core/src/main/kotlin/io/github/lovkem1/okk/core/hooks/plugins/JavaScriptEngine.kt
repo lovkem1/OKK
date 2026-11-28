@@ -642,7 +642,7 @@ object JavaScriptEngine {
 
             setVariable("engineId", "OKK", false)
             setVariable("engineVerCode", 18, false)
-            setVariable("engineVerName", "1.2.63", false)
+            setVariable("engineVerName", "1.2.65", false)
 
             // Pre-import packages and classes for Hchat / WA compatibility
             nameSpace.importPackage("java.io")

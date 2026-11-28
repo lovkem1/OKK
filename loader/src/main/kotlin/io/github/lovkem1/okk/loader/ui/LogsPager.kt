@@ -146,7 +146,7 @@ fun LogsPager() {
     val copyDiagnostic = {
         val full = buildString {
             appendLine("=== Lokk 诊断报告 ===")
-            appendLine("Module: v1.2.63")
+            appendLine("Module: v1.2.65")
             appendLine("WeChat: $wxVer")
             appendLine("Report: ${compat?.summaryLine()}")
             appendLine("Hooks: $hookSum")

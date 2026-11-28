@@ -39,7 +39,7 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-private const val OKK_VERSION = "1.2.63"
+private const val OKK_VERSION = "1.2.65"
 
 @Composable
 fun HomePager() {

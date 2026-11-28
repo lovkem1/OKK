@@ -6,11 +6,14 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -43,6 +46,7 @@ object SettingsEntryHook {
     private const val ROW_KEY = "SettingGroup_Main_OKK"
     private const val PLUS_MENU_ID = 0x0A0C2026
     private const val FLOATING_ENTRY_TAG = "lokk_settings_floating_entry"
+    private const val SEARCH_TRIGGER = "#Lokk"
 
     private val installed = AtomicBoolean(false)
     private val modernDataHookInstalled = AtomicBoolean(false)
@@ -58,6 +62,8 @@ object SettingsEntryHook {
         n += hookLegacySettings(classLoader)
         // 微信设置页新增 Lokk 入口（悬浮按钮，不依赖版本敏感的 MVVM 内部列表结构）
         n += hookSettingsActivityEntry(classLoader)
+        // 首页搜索框输入 #Lokk 唤起设置面板
+        n += hookHomeSearchTrigger(classLoader)
         val plusOk = hookHomePlusMenu(classLoader, context)
         n += plusOk
         xlog("settings entry hooks installed count=$n plusMenu=${if (plusOk > 0) "OK" else "FAIL"}")
@@ -1110,6 +1116,71 @@ object SettingsEntryHook {
                 }
             }
         }
+    }
+
+    // ── 首页搜索框 #Lokk 触发 ────────────────────────────────────────────
+
+    private val watchedSearchViews = java.util.Collections.newSetFromMap(
+        java.util.WeakHashMap<View, Boolean>()
+    )
+    private val firedSearchInputs = java.util.Collections.newSetFromMap(
+        java.util.WeakHashMap<EditText, Boolean>()
+    )
+
+    /**
+     * 微信首页搜索框输入 #Lokk 唤起设置面板。
+     * 8.0.79 实测：首页搜索 = WebSearchView.getFtsEditText():FTSEditTextView -> getEditText():EditText。
+     * hook FTSEditTextView 构造函数（明文稳定类名），post 到下一轮再挂 TextWatcher
+     * （构造时 EditText 尚未 inflate）。纯追加监听，不影响微信自身 TextWatcher。
+     */
+    private fun hookHomeSearchTrigger(classLoader: ClassLoader): Int {
+        val clazz = runCatching {
+            XposedHelpers.findClass("com.tencent.mm.ui.search.FTSEditTextView", classLoader)
+        }.getOrNull() ?: run {
+            xlog("home search trigger: FTSEditTextView not found")
+            return 0
+        }
+        var hooked = 0
+        for (ctor in clazz.declaredConstructors) {
+            runCatching {
+                XposedBridge.hookMethod(ctor, object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        val container = param.thisObject as? View ?: return
+                        container.post { attachSearchWatcher(container) }
+                    }
+                })
+                hooked++
+            }.onFailure { xlog("hook FTSEditTextView ctor fail: ${it.message}") }
+        }
+        xlog("home search trigger hooked constructors=$hooked")
+        return hooked
+    }
+
+    private fun attachSearchWatcher(container: View) {
+        synchronized(watchedSearchViews) {
+            if (!watchedSearchViews.add(container)) return
+        }
+        val editText = runCatching {
+            XposedHelpers.callMethod(container, "getEditText") as? EditText
+        }.getOrNull() ?: return
+
+        editText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+            override fun afterTextChanged(s: Editable?) {
+                val text = s?.toString()?.trim().orEmpty()
+                if (text.equals(SEARCH_TRIGGER, ignoreCase = true)) {
+                    // 同一次输入只触发一次；清空后可再次触发
+                    if (!firedSearchInputs.add(editText)) return
+                    runCatching {
+                        openSettings(editText.context)
+                    }.onFailure { xlog("open settings from search trigger fail: ${it.message}") }
+                } else if (text.isEmpty()) {
+                    firedSearchInputs.remove(editText)
+                }
+            }
+        })
+        xlog("search watcher attached on ${editText.javaClass.simpleName}")
     }
 
     private fun openSettings(context: Context) {

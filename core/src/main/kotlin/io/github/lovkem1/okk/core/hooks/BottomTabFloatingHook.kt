@@ -66,6 +66,14 @@ object BottomTabFloatingHook {
     private fun hideBarEnabled(): Boolean =
         BottomTabConfig.floatingEnabled() || BottomTabConfig.hideBar()
 
+    /** 小程序页面：悬浮底栏不应渲染（8.0.79 实测主类为 AppBrandUI） */
+    private fun isMiniProgramActivity(activity: Activity): Boolean {
+        val n = activity.javaClass.name
+        return n == "com.tencent.mm.plugin.appbrand.ui.AppBrandUI" ||
+            n.contains("AppBrand", ignoreCase = true) ||
+            n.contains("MiniProgram", ignoreCase = true)
+    }
+
     fun install(context: Context, classLoader: ClassLoader, modulePath: String? = null) {
         if (!installed.compareAndSet(false, true)) return
         appContext = context.applicationContext ?: context
@@ -161,6 +169,11 @@ object BottomTabFloatingHook {
                 object : android.app.Application.ActivityLifecycleCallbacks {
                     override fun onActivityResumed(activity: Activity) {
                         val cn = activity.javaClass.name
+                        // 小程序页面：主动隐藏悬浮底栏（底栏是全局单例 View，不会随 Activity 切换自动移除）
+                        if (isMiniProgramActivity(activity)) {
+                            floatingBar?.hideBar(animated = false)
+                            return
+                        }
                         if (!cn.contains("LauncherUI") && !cn.contains("MainTabUI")) return
                         if (!hideBarEnabled()) return
                         for (delay in longArrayOf(150L, 500L, 1500L)) {
@@ -180,6 +193,9 @@ object BottomTabFloatingHook {
 
     private fun ensureBarAttached(activity: Activity) {
         if (activity.isFinishing || !hideBarEnabled()) return
+        // 拦截小程序前台时的延迟回调（150/500/1500ms），避免底栏被重新 bringToFront 显示
+        val top = io.github.lovkem1.okk.core.hooks.plugins.ActivityUtils.getTopMostActivity(false)
+        if (top != null && isMiniProgramActivity(top)) return
         attachWindowTouchListener(activity)
 
         val mt = mainTabUiRef?.get()
@@ -228,6 +244,8 @@ object BottomTabFloatingHook {
         val bar = floatingBar
         if (bar != null && bar.isAttachedToWindow) {
             bar.bringToFront()
+            // 回到主页时撤销小程序的隐藏，恢复悬浮底栏可见
+            bar.showBar(animated = false)
             return
         }
         if (mt != null) {

@@ -97,14 +97,21 @@ object SwipeDeleteKeepHook {
     }
 
     fun install(ctx: Context, cl: ClassLoader, mp: String?) {
-        if (!isEnabled()) return
+        // 不在安装时检查开关：默认关闭是工单要求，但若安装时 return，
+        // 用户后续在设置里打开开关也不会生效（必须重启微信）。
+        // 回调里已用 isEnabled() 判断（见 191 行），打开即生效。
         if (!isInstalled.compareAndSet(false, true)) return
-        xlog("install requested enabled=true")
+        xlog("install requested enabled=${isEnabled()}")
 
         Thread {
             resolveStorageAndWorker(ctx, cl, mp)
             hookConversationAdapters(ctx, cl, mp)
-            xlog("install done enabled=true")
+            runCatching {
+                io.github.lovkem1.okk.core.startup.FeatureHookRegistry.reportEffective(
+                    "SwipeDeleteKeep", true, "左滑删除存记录 hook 已安装（开关在回调判断）"
+                )
+            }
+            xlog("install done enabled=${isEnabled()}")
         }.start()
     }
 

@@ -44,6 +44,9 @@ object EditMessageHook {
     private const val EDIT_ID = 1212368196
     private const val MENU_TITLE = "\u4fee\u6539"
     private const val MESSAGE_TABLE = "message"
+    /** 修改记录持久化 key：跨重启保留，保证"还原"按钮始终可用 */
+    private const val KEY_EDIT_RECORDS = "edit_message_records"
+    private const val MAX_RECORDS = 300
 
     private val installed = AtomicBoolean(false)
     private val dbHookInstalled = AtomicBoolean(false)
@@ -51,9 +54,12 @@ object EditMessageHook {
     private val hookedSelectionMethods = AtomicInteger(0)
     private val editedTexts = ConcurrentHashMap<String, String>()
     private val editedByMsgId = ConcurrentHashMap<Long, String>()
+    /** 完整修改记录（含 rawContent），用于跨重启还原 */
+    private val editRecords = ConcurrentHashMap<Long, EditRecord>()
     private val msgGetterCache = ConcurrentHashMap<Class<*>, Method?>()
     private val msgFieldCache = ConcurrentHashMap<Class<*>, Field?>()
     private val dbMethodCache = ConcurrentHashMap<Class<*>, Method?>()
+    private val dbExecCache = ConcurrentHashMap<Class<*>, Method?>()
     private val dbList = CopyOnWriteArrayList<Any>()
     private val dbClassUpdateCache = ConcurrentHashMap<Class<*>, Boolean>()
     private val dbIdentitySeen = Collections.newSetFromMap(IdentityHashMap<Any, Boolean>())
@@ -94,15 +100,84 @@ object EditMessageHook {
         val target: WeakReference<TextView>
     )
 
+    /**
+     * 持久化的单条修改记录。
+     * [original] 为首次修改前的正文（不含 wxid 前缀），[rawContent] 为首次修改前的原始 content，
+     * 二者都在“第一次保存”时固化，之后不再被编辑后的内容覆盖 —— 这是“还原”能真正回到原文的关键。
+     */
+    private data class EditRecord(
+        val msgId: Long,
+        val original: String,
+        val edited: String,
+        val rawContent: String
+    )
+
+    private val recordsLoaded = AtomicBoolean(false)
+
+    /** 从配置中心读取修改记录，并把 msgId → 修改后文本 的映射恢复到内存 */
+    private fun loadRecords() {
+        if (!recordsLoaded.compareAndSet(false, true)) return
+        runCatching {
+            val raw = PublicConfigStore.getString(KEY_EDIT_RECORDS, "")
+            if (raw.isBlank()) return@runCatching
+            val arr = if (raw.trimStart().startsWith("{")) {
+                org.json.JSONObject(raw).optJSONArray("items")
+            } else {
+                org.json.JSONArray(raw)
+            } ?: return@runCatching
+            for (i in 0 until arr.length()) {
+                val o = arr.optJSONObject(i) ?: continue
+                val msgId = o.optLong("id", 0L)
+                val original = o.optString("original", "")
+                val edited = o.optString("edited", "")
+                if (msgId <= 0L || original.isBlank() || edited.isBlank()) continue
+                val rawOriginal = o.optString("raw", "").ifBlank { original }
+                editRecords[msgId] = EditRecord(msgId, original, edited, rawOriginal)
+                // 只恢复 msgId 维度映射：按原文文本建映射会在“多条相同的短消息”场景误伤其它消息
+                editedByMsgId[msgId] = edited
+            }
+            xlog("edit records loaded=${editRecords.size}")
+        }.onFailure { xlog("edit records load fail: ${it.message}") }
+    }
+
+    private fun persistRecords() {
+        runCatching {
+            val arr = org.json.JSONArray()
+            editRecords.values
+                .sortedBy { it.msgId }
+                .takeLast(MAX_RECORDS)
+                .forEach { r ->
+                    arr.put(org.json.JSONObject().apply {
+                        put("id", r.msgId)
+                        put("original", r.original)
+                        put("edited", r.edited)
+                        put("raw", r.rawContent)
+                    })
+                }
+            // 配置中心是行式 key=value，JSONArray.toString() 不带换行，可安全落盘
+            PublicConfigStore.putPersisted(KEY_EDIT_RECORDS, arr.toString())
+            xlog("edit records persisted=${arr.length()}")
+        }.onFailure { xlog("edit records persist fail: ${it.message}") }
+    }
+
     fun install(context: Context, classLoader: ClassLoader, modulePath: String? = null) {
         if (!installed.compareAndSet(false, true)) return
         xlog("install enabled=${isEnabled()}")
+        runCatching { loadRecords() }
         hookDatabaseCapture(classLoader)
         hookTextRebind()
         hookLongPress()
         hookWechatMenu(classLoader)
         hookMenuItemClick(classLoader)
         hookMenuSelection(context, classLoader, modulePath)
+        // 自检上报：此前缺失导致适配报告显示 OK 但功能实际空转（开关默认关闭时无法发现）
+        runCatching {
+            io.github.lovkem1.okk.core.startup.FeatureHookRegistry.reportEffective(
+                "EditMessage",
+                isEnabled(),
+                if (isEnabled()) "修改消息 hook 已装且开关开启" else "hook 已装但开关关闭（默认关闭，需在模块设置开启）"
+            )
+        }
     }
 
     fun isEnabled(): Boolean =
@@ -897,57 +972,81 @@ object EditMessageHook {
         xlog("edit blocked: no active message ref")
     }
 
-    private fun showEditDialog(tv: TextView) {
-        if (!isEnabled()) return
-        if (dialogOpen) return
-        menuShown = true
-        val ctx = tv.context ?: return
-        val originalText = resolveOriginalText(tv)
-        showStyledEditDialog(ctx, originalText, editedTexts[originalText] ?: originalText, isEdited = editedTexts.containsKey(originalText)) { newText, isReset ->
-            if (isReset) {
-                editedTexts.remove(originalText)
-                applyEditedText(tv, originalText)
-                Toast.makeText(ctx, "已还原原始消息", Toast.LENGTH_SHORT).show()
-            } else {
-                if (originalText.isNotBlank()) editedTexts[originalText] = newText
-                applyEditedText(tv, newText)
-                Toast.makeText(ctx, "已保存本地修改", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
     private fun showEditDialog(ref: MessageRef, tv: TextView) {
         if (!isEnabled()) return
         if (dialogOpen) return
         menuShown = true
         val ctx = tv.context ?: return
-        val originalText = ref.content
-        val currentText = editedByMsgId[ref.msgId] ?: originalText
-        val isEdited = editedByMsgId.containsKey(ref.msgId) || editedTexts.containsKey(originalText)
+        loadRecords()
 
-        showStyledEditDialog(ctx, originalText, currentText, isEdited) { newText, isReset ->
+        // 原文必须以「首次修改前」为准：消息对象/数据库里可能已经是我们写回的修改后内容，
+        // 直接把 ref.content 当原文会导致“还原”回到修改后的文本（表现为还原无效）。
+        val record = editRecords[ref.msgId]
+        val editedBody = record?.edited ?: editedByMsgId[ref.msgId]
+        // 旧版本（无持久化记录）遗留的修改：用 原文->修改后 的反向映射把原文捞回来
+        val recovered = if (record == null && editedBody != null) {
+            editedTexts.entries.firstOrNull { it.value == editedBody }?.key
+        } else null
+        val originalBody = record?.original ?: recovered ?: ref.content
+        val originalRaw = record?.rawContent ?: ref.rawContent
+        val currentText = editedBody ?: originalBody
+
+        showStyledEditDialog(ctx, originalBody, currentText, editedBody != null) { newText, isReset ->
             if (isReset) {
-                editedByMsgId.remove(ref.msgId)
-                if (originalText.isNotBlank()) editedTexts.remove(originalText)
-                tv.setTag(io.github.lovkem1.okk.core.R.id.abc_tag_edit_msg_id, null)
-                val rawEdited = rawContentWithEditedBody(ref.rawContent, originalText)
-                ref.message.get()?.let { writeMessageContent(it, rawEdited) }
-                updateMessageContentInDb(ref.msgId, rawEdited)
-                applyEditedVisual(ref, tv, originalText, originalText)
-                tv.post { applyEditedVisual(ref, tv, originalText, originalText) }
-                Toast.makeText(ctx, "已还原原始消息", Toast.LENGTH_SHORT).show()
+                restoreMessage(ref, tv, originalBody, originalRaw)
             } else {
-                editedByMsgId[ref.msgId] = newText
-                if (originalText.isNotBlank()) editedTexts[originalText] = newText
-                tv.setTag(io.github.lovkem1.okk.core.R.id.abc_tag_edit_msg_id, ref.msgId)
-                val rawEdited = rawContentWithEditedBody(ref.rawContent, newText)
-                val objectApplied = ref.message.get()?.let { writeMessageContent(it, rawEdited) } == true
-                val dbRows = updateMessageContentInDb(ref.msgId, rawEdited)
-                applyEditedVisual(ref, tv, originalText, newText)
-                tv.post { applyEditedVisual(ref, tv, originalText, newText) }
-                Toast.makeText(ctx, "已保存本地修改", Toast.LENGTH_SHORT).show()
-                xlog("edited msgId=${ref.msgId} objectApplied=$objectApplied dbRows=$dbRows")
+                if (newText.isBlank()) {
+                    Toast.makeText(ctx, "内容不能为空", Toast.LENGTH_SHORT).show()
+                } else {
+                    editRecords[ref.msgId] = EditRecord(ref.msgId, originalBody, newText, originalRaw)
+                    persistRecords()
+                    editedByMsgId[ref.msgId] = newText
+                    if (originalBody.isNotBlank()) editedTexts[originalBody] = newText
+                    tv.setTag(io.github.lovkem1.okk.core.R.id.abc_tag_edit_msg_id, ref.msgId)
+                    val rawEdited = rawContentWithEditedBody(originalRaw, newText)
+                    val objectApplied = ref.message.get()?.let { writeMessageContent(it, rawEdited) } == true
+                    val dbRows = updateMessageContentInDb(ref.msgId, rawEdited)
+                    applyEditedVisual(ref, tv, originalBody, newText)
+                    tv.post { applyEditedVisual(ref, tv, originalBody, newText) }
+                    Toast.makeText(ctx, "已保存本地修改", Toast.LENGTH_SHORT).show()
+                    xlog("edited msgId=${ref.msgId} objectApplied=$objectApplied dbRows=$dbRows")
+                }
             }
+        }
+    }
+
+    /** 还原为首次修改前的原文，并把持久化记录一并清掉 */
+    private fun restoreMessage(ref: MessageRef, tv: TextView, originalBody: String, originalRaw: String) {
+        val ctx = tv.context ?: return
+        val editedBody = editRecords[ref.msgId]?.edited ?: editedByMsgId[ref.msgId]
+        val rawOriginal = originalRaw.ifBlank { originalBody }
+
+        val objectApplied = ref.message.get()?.let { writeMessageContent(it, rawOriginal) } == true
+        val dbRows = updateMessageContentInDb(ref.msgId, rawOriginal)
+        val persisted = objectApplied || dbRows > 0
+
+        if (persisted) {
+            // 写回成功才清除记录：写失败时保留记录，用户重进对话框仍可再次点“还原”
+            editRecords.remove(ref.msgId)
+            persistRecords()
+            editedByMsgId.remove(ref.msgId)
+            removeTextOverrides(originalBody, editedBody)
+        }
+        tv.setTag(io.github.lovkem1.okk.core.R.id.abc_tag_edit_msg_id, ref.msgId)
+        applyEditedVisual(ref, tv, originalBody, originalBody)
+        tv.post { applyEditedVisual(ref, tv, originalBody, originalBody) }
+
+        val msg = if (persisted) "已还原原始消息" else "已还原显示，但记录未能写回，请退出聊天重进后重试"
+        Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()
+        xlog("restore msgId=${ref.msgId} objectApplied=$objectApplied dbRows=$dbRows persisted=$persisted body=${shortLog(originalBody)}")
+    }
+
+    /** 清掉按原文文本建立的兜底映射，避免列表刷新时又被贴回修改后内容 */
+    private fun removeTextOverrides(originalBody: String, editedBody: String?) {
+        if (originalBody.isNotBlank()) editedTexts.remove(originalBody)
+        if (editedBody.isNullOrBlank()) return
+        editedTexts.keys.toList().forEach { key ->
+            if (editedTexts[key] == editedBody) editedTexts.remove(key)
         }
     }
 
@@ -1149,8 +1248,34 @@ object EditMessageHook {
             }
             rows += invokeDbUpdate(db, MESSAGE_TABLE, content, "msgId=$msgId", emptyArray())
         }
+        if (rows <= 0) {
+            // update() 常因 WCDB 参数绑定差异返回 0，用 execSQL 兜底再写一次
+            for (db in dbs) {
+                if (invokeDbExecSql(db, "UPDATE $MESSAGE_TABLE SET content=? WHERE msgId=?", arrayOf<Any?>(content, msgId))) {
+                    rows += 1
+                }
+            }
+        }
         if (rows <= 0) xlog("db update missed msgId=$msgId dbs=${dbs.size}")
         return rows
+    }
+
+    private fun invokeDbExecSql(db: Any, sql: String, args: Array<Any?>): Boolean {
+        val method = dbExecCache.computeIfAbsent(db.javaClass) { clazz ->
+            clazz.methods.firstOrNull {
+                it.name == "execSQL" &&
+                    it.parameterTypes.size == 2 &&
+                    it.parameterTypes[0] == String::class.java &&
+                    it.parameterTypes[1].isArray
+            }?.apply { isAccessible = true }
+        } ?: return false
+        return runCatching {
+            method.invoke(db, sql, args)
+            true
+        }.getOrElse {
+            xlog("db execSQL fail ${db.javaClass.name}: ${it.message}")
+            false
+        }
     }
 
     private fun invokeDbUpdate(
