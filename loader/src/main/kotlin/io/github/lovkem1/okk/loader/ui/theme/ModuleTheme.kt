@@ -91,7 +91,7 @@ fun OKKTheme(
     content: @Composable () -> Unit
 ) {
     val autoDpiOn = androidx.compose.runtime.remember {
-        io.github.lovkem1.okk.core.hooks.PublicConfigStore.getBoolean("auto_dpi_scaling_enabled", true)
+        io.github.lovkem1.okk.core.hooks.PublicConfigStore.getBoolean("auto_dpi_scaling_enabled", false)
     }
     val context = androidx.compose.ui.platform.LocalContext.current
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current

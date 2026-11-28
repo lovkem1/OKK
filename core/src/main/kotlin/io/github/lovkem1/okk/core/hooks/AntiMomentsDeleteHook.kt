@@ -36,7 +36,7 @@ object AntiMomentsDeleteHook {
 
     /** 定制版：朋友圈防删除默认开启，可在设置内关闭 */
     fun isEnabled(): Boolean =
-        runCatching { PublicConfigStore.getBoolean(KEY, true) }.getOrDefault(true)
+        runCatching { PublicConfigStore.getBoolean(KEY, false) }.getOrDefault(false)
 
     fun install(context: Context, classLoader: ClassLoader, modulePath: String? = null) {
         if (!isEnabled()) {

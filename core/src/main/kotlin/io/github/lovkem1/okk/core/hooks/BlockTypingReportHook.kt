@@ -38,7 +38,7 @@ object BlockTypingReportHook {
     }
 
     fun isEnabled(): Boolean =
-        runCatching { PublicConfigStore.getBoolean(KEY, true) }.getOrDefault(true)
+        runCatching { PublicConfigStore.getBoolean(KEY, false) }.getOrDefault(false)
 
     private fun installTypingUploadByDexKit(context: Context, classLoader: ClassLoader, modulePath: String?): Boolean {
         if (!dexKitAttempted.compareAndSet(false, true)) return false

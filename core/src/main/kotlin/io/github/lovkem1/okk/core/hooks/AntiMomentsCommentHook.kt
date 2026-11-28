@@ -48,7 +48,7 @@ object AntiMomentsCommentHook {
     }
 
     fun isEnabled(): Boolean =
-        runCatching { PublicConfigStore.getBoolean(KEY, true) }.getOrDefault(true)
+        runCatching { PublicConfigStore.getBoolean(KEY, false) }.getOrDefault(false)
 
     // ── 1. SnsCommentStorage.deleteComment / deleteBySnsId ────────────────
 

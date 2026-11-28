@@ -39,7 +39,7 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-private const val OKK_VERSION = "1.2.6"
+private const val OKK_VERSION = "1.2.63"
 
 @Composable
 fun HomePager() {
@@ -61,8 +61,8 @@ fun HomePager() {
     val heroTitle = if (heroOk) "模块运行正常" else "$issueTotal 项功能需关注"
     val heroSub = if (heroOk) "LSPosed · ${wxVer ?: "微信"} · v$OKK_VERSION" else "部分功能未生效或加载失败"
 
-    MiuixListScaffold(title = "Welcome OKK!") {
-        // ── 主卡片区域：左侧 OKK 放大美化卡片 + 右侧 (已启用 / 全部功能) 上下双方块 ──
+    MiuixListScaffold(title = "Welcome Lokk!") {
+        // ── 主卡片区域：左侧 Lokk 放大美化卡片 + 右侧 (已启用 / 全部功能) 上下双方块 ──
         item(key = "main_banner") {
             Spacer(Modifier.height(4.dp))
             Row(
@@ -180,35 +180,22 @@ private fun OkkBrandCard(modifier: Modifier = Modifier) {
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // 放大比例的 OKK 标题
+                // 放大比例的 Lokk 标题
                 Column {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(
-                            text = "OKK",
+                            text = "Lokk",
                             fontSize = 38.sp,
                             fontWeight = FontWeight.Black,
                             color = accentColor,
                             letterSpacing = 1.sp
                         )
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(accentColor.copy(alpha = 0.15f))
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = "YES",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = accentColor
-                            )
-                        }
                     }
                     Text(
-                        text = "OKK Enhancement",
+                        text = "Lokk Enhancement",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = accentColor.copy(alpha = 0.7f)

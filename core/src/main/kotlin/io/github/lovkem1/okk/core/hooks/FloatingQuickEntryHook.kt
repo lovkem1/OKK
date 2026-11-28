@@ -224,8 +224,8 @@ object FloatingQuickEntryHook {
         }
         enabledCached = runCatching {
             if (force) PublicConfigStore.reload(true)
-            PublicConfigStore.getBoolean(KEY, true)
-        }.getOrDefault(true)
+            PublicConfigStore.getBoolean(KEY, false)
+        }.getOrDefault(false)
         enabledAt = now
         return enabledCached
     }

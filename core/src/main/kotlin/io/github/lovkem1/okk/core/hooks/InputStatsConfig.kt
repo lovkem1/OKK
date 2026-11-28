@@ -11,8 +11,8 @@ object InputStatsConfig {
         if (now - lastLoadTime < 5_000L) return cached
         lastLoadTime = now
         cached = InputStatsOptions(
-            enabled = PublicConfigStore.getBoolean("input_stats_enabled", true),
-            countSend = PublicConfigStore.getBoolean("input_stats_count_send", true),
+            enabled = PublicConfigStore.getBoolean("input_stats_enabled", false),
+            countSend = PublicConfigStore.getBoolean("input_stats_count_send", false),
             template = PublicConfigStore.getString("input_stats_template", DEFAULT_INPUT_STATS_TEMPLATE)
         )
         return cached

@@ -29,6 +29,24 @@ object PublicConfigStore {
 
     @Volatile private var migrated = false
 
+    /** 配置默认值版本：升级到此版本时一次性把所有功能开关重置为关闭。 */
+    private const val KEY_DEFAULTS_VERSION = "feature_defaults_version"
+    private const val DEFAULTS_VERSION = "2"
+    /** 需要随版本迁移强制关闭的功能开关（不含 settings_entry_enabled 入口）。 */
+    private val featureSwitchKeys = listOf(
+        "anti_revoke", "close_friend_hide_conversation", "close_friend_hide_contact",
+        "close_friend_hide_sns", "close_friend_hide_search", "revoke_notice_enabled",
+        "anti_revoke_keep_self", "media_protect_enabled", "anti_moments_delete",
+        "swipe_quote", "bubble_enabled", "detail_enabled", "input_stats_enabled",
+        "input_stats_count_send", "anti_moments_comment_revoke", "home_avatar_entry",
+        "remove_call_limits_enabled", "chat_toolbar_enabled", "auto_dpi_scaling_enabled",
+        "disable_hot_update", "download_redirect_enabled", "conv_card_enabled",
+        "fold_banner_fixed", "bottom_tab_floating_labels", "bottom_tab_floating_badge",
+        "night_mode_follow", "block_typing_report", "swipe_delete_keep",
+        "conversation_grouping_enabled", "floating_quick_entry", "java_plugin_enabled",
+        "finder_video_download"
+    )
+
     // 配置变化监听器：key -> listeners。保存配置后立即回调，实现“保存即生效”。
     // 监听器在主线程回调（各功能刷新 UI 需要主线程）。
     private val listeners = ConcurrentHashMap<String, MutableList<(String) -> Unit>>()
@@ -77,25 +95,25 @@ object PublicConfigStore {
     }
 
     private val defaults = linkedMapOf(
-        "anti_revoke" to "true",
+        "anti_revoke" to "false",
         "close_friend_enabled" to "false",
-        "close_friend_hide_conversation" to "true",
-        "close_friend_hide_contact" to "true",
-        "close_friend_hide_sns" to "true",
-        "close_friend_hide_search" to "true",
-        "revoke_notice_enabled" to "true",
-        "anti_revoke_keep_self" to "true",
+        "close_friend_hide_conversation" to "false",
+        "close_friend_hide_contact" to "false",
+        "close_friend_hide_sns" to "false",
+        "close_friend_hide_search" to "false",
+        "revoke_notice_enabled" to "false",
+        "anti_revoke_keep_self" to "false",
         "anti_revoke_notice_text" to "{name}撤回了一条消息",
-        "media_protect_enabled" to "true",
-        "anti_moments_delete" to "true",
-        "swipe_quote" to "true",
+        "media_protect_enabled" to "false",
+        "anti_moments_delete" to "false",
+        "swipe_quote" to "false",
         "swipe_repeat" to "false",
         "quote_delete_clear" to "false",
-        "bubble_enabled" to "true",
+        "bubble_enabled" to "false",
         "settings_entry_enabled" to "true",
         "module_log_enabled" to "false",
         "bottom_tab_hide_title" to "false",
-        "detail_enabled" to "true",
+        "detail_enabled" to "false",
         "detail_template" to "\${time} \${relativeTime}",
         "detail_time_pattern" to "MM-dd HH:mm:ss",
         "detail_text_size" to "12",
@@ -104,46 +122,46 @@ object PublicConfigStore {
         "detail_text_color_light" to "#E6000000",
         "detail_text_color_dark" to "#CCFFFFFF",
         "detail_click_show" to "false",
-        "input_stats_enabled" to "true",
-        "input_stats_count_send" to "true",
+        "input_stats_enabled" to "false",
+        "input_stats_count_send" to "false",
         "input_stats_template" to "今日已发\${totalMsg}条",
         "round_avatar_enabled" to "false",
         "round_avatar_radius" to "0.36",
-        "anti_moments_comment_revoke" to "true",
+        "anti_moments_comment_revoke" to "false",
         "virtual_location_enabled" to "false",
         "virtual_location_latitude" to "",
         "virtual_location_longitude" to "",
         "auto_login_win_enabled" to "false",
-        "auto_login_win_sync_msg" to "true",
-        "auto_login_win_show_device" to "true",
+        "auto_login_win_sync_msg" to "false",
+        "auto_login_win_show_device" to "false",
         "auto_login_win_auto_device" to "false",
-        "auto_login_win_auto_click" to "true",
+        "auto_login_win_auto_click" to "false",
         "remove_moments_ads" to "false",
         "profile_id" to "false",
-        "home_avatar_entry" to "true",
+        "home_avatar_entry" to "false",
         "home_drawer_shortcuts" to "qrcode,pay,favorite",
-        "home_drawer_signature" to "OKK 快捷面板",
+        "home_drawer_signature" to "Lokk 快捷面板",
         "home_status_custom" to "",
         "theme_wallpaper_enabled" to "false",
         "theme_wallpaper_alpha" to "0.15",
         "theme_wallpaper_transparent_status_bar" to "true",
         "theme_wallpaper_text_bold" to "true",
         "system_camera_enabled" to "false",
-        "remove_call_limits_enabled" to "true",
-        "chat_toolbar_enabled" to "true",
-        "auto_dpi_scaling_enabled" to "true",
-        "disable_hot_update" to "true",
-        "download_redirect_enabled" to "true",
+        "remove_call_limits_enabled" to "false",
+        "chat_toolbar_enabled" to "false",
+        "auto_dpi_scaling_enabled" to "false",
+        "disable_hot_update" to "false",
+        "download_redirect_enabled" to "false",
         "real_name_tail" to "false",
         "real_name_tail_color" to "#9E9E9E",
         "member_title" to "false",
-        "member_title_show_member" to "true",
+        "member_title_show_member" to "false",
         "member_title_owner" to "群主",
         "member_title_admin" to "管理员",
         "member_title_member" to "成员",
         "edit_message" to "false",
         "hide_home_divider" to "false",
-        "conv_card_enabled" to "true",
+        "conv_card_enabled" to "false",
         "conv_card_inset_dp" to "10",
         "conv_card_corner_dp" to "12",
         "conv_card_mode" to "container",
@@ -151,15 +169,15 @@ object PublicConfigStore {
         "conv_pinned_color_dark" to "#38383E",
         "conv_normal_color_light" to "#FFFFFF",
         "conv_normal_color_dark" to "#1E1E1E",
-        "fold_banner_fixed" to "true",
+        "fold_banner_fixed" to "false",
         "bottom_tab_floating" to "false",
-        "bottom_tab_floating_labels" to "true",
-        "bottom_tab_floating_badge" to "true",
+        "bottom_tab_floating_labels" to "false",
+        "bottom_tab_floating_badge" to "false",
         "bottom_tab_title_chats" to "微信",
         "bottom_tab_title_contacts" to "通讯录",
         "bottom_tab_title_discover" to "发现",
         "bottom_tab_title_me" to "我",
-        "night_mode_follow" to "true",
+        "night_mode_follow" to "false",
         "night_mode" to "false"
     )
 
@@ -272,7 +290,7 @@ object PublicConfigStore {
         }.getOrDefault(false)
     }
 
-    fun ensureDefaults(context: Context? = null) {
+    fun ensureDefaults(context: Context? = null, asyncWrite: Boolean = false) {
         reload(force = true)
         var changed = configFiles().none { it.isFile }
         defaults.forEach { (k, v) ->
@@ -303,7 +321,16 @@ object PublicConfigStore {
             changed = true
         }
 
-        if (changed) flush(async = false)
+        // 一次性迁移：老用户升级后所有功能默认关闭（保留入口与用户后续自定义）
+        if (cache[KEY_DEFAULTS_VERSION] != DEFAULTS_VERSION) {
+            featureSwitchKeys.forEach { key ->
+                cache[key] = "false"
+            }
+            cache[KEY_DEFAULTS_VERSION] = DEFAULTS_VERSION
+            changed = true
+        }
+
+        if (changed) flush(async = asyncWrite)
     }
 
     /**

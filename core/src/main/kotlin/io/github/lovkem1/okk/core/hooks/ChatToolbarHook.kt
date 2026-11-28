@@ -81,7 +81,7 @@ object ChatToolbarHook {
         @Volatile var refreshScheduled: Boolean = false
     }
 
-    fun isEnabled(): Boolean = PublicConfigStore.getBoolean(KEY_ENABLED, true)
+    fun isEnabled(): Boolean = PublicConfigStore.getBoolean(KEY_ENABLED, false)
 
     fun install(context: Context, classLoader: ClassLoader, modulePath: String? = null) {
         if (!installed.compareAndSet(false, true)) return
@@ -420,7 +420,7 @@ object ChatToolbarHook {
         val appPanel = bindFooterPanel(footer)
 
         val ctx = footer.context
-        val autoDpiOn = PublicConfigStore.getBoolean("auto_dpi_scaling_enabled", true)
+        val autoDpiOn = PublicConfigStore.getBoolean("auto_dpi_scaling_enabled", false)
         val dm = ctx.resources.displayMetrics
         val density = dm.density
         val realWidthPx = minOf(dm.widthPixels, dm.heightPixels).toFloat()

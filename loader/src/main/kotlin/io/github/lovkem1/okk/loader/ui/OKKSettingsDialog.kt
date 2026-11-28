@@ -19,13 +19,19 @@ import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.lifecycle.Lifecycle
@@ -176,7 +182,8 @@ object OKKSettingsDialog {
         runCatching {
             openDialog?.dismiss()
             openDialog = null
-            io.github.lovkem1.okk.core.hooks.PublicConfigStore.ensureDefaults(host)
+            // 异步落盘：避免同步写盘阻塞主线程导致首屏白屏
+            io.github.lovkem1.okk.core.hooks.PublicConfigStore.ensureDefaults(host, asyncWrite = true)
 
             val owner = DialogComposeOwner(
                 onFallbackBack = { runCatching { openDialog?.dismiss() } }
@@ -267,6 +274,12 @@ object OKKSettingsDialog {
                             mutableStateOf(EmbeddedSettingsUi.isWeChatDark(host))
                         }
                         OKKTheme(darkTheme = dark) {
+                            // 首帧加载指示：内容组合完成前显示顶部进度条，消除白屏观感
+                            var firstFrameReady by remember { mutableStateOf(false) }
+                            LaunchedEffect(Unit) {
+                                kotlinx.coroutines.delay(120)
+                                firstFrameReady = true
+                            }
                             Box(Modifier.fillMaxSize()) {
                                 OKKSettingsRoot(
                                     onExitRoot = {
@@ -282,6 +295,16 @@ object OKKSettingsDialog {
                                         else -> MainTab.Features
                                     }
                                 )
+                                if (!firstFrameReady) {
+                                    LinearProgressIndicator(
+                                        modifier = Modifier
+                                            .align(Alignment.TopCenter)
+                                            .fillMaxWidth()
+                                            .height(3.dp),
+                                        color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                                        trackColor = androidx.compose.ui.graphics.Color.Transparent
+                                    )
+                                }
                             }
                         }
                     }

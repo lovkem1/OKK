@@ -642,7 +642,7 @@ object JavaScriptEngine {
 
             setVariable("engineId", "OKK", false)
             setVariable("engineVerCode", 18, false)
-            setVariable("engineVerName", "1.2.6", false)
+            setVariable("engineVerName", "1.2.63", false)
 
             // Pre-import packages and classes for Hchat / WA compatibility
             nameSpace.importPackage("java.io")
@@ -695,7 +695,7 @@ object JavaScriptEngine {
                         val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
                         if (nm != null) {
                             val channelId = "script_${plugin.id}"
-                            val channel = NotificationChannel(channelId, "OKK Script: ${plugin.info.name}", NotificationManager.IMPORTANCE_DEFAULT)
+                            val channel = NotificationChannel(channelId, "Lokk Script: ${plugin.info.name}", NotificationManager.IMPORTANCE_DEFAULT)
                             nm.createNotificationChannel(channel)
                             val notification = android.app.Notification.Builder(ctx, channelId)
                                 .setContentTitle(title)

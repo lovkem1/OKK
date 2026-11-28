@@ -39,24 +39,19 @@ fun OKKSettingsRoot(
     var featuresQuery by remember { mutableStateOf("") }
     var lastStackPopTime by remember { mutableStateOf(0L) }
 
-    // 绝对防越界：在设置 Dialog 打开期间永远启用 BackHandler！
-    // 拦截任何系统的侧滑手势或物理按键，逐级消费，决不误关 Dialog。
-    // 结合 lastStackPopTime 800ms 安全窗口，彻底解决 MIUI/ColorOS 手势完结后延迟 450ms 补发的伪 onBackPressed 导致的误关。
+    // 返回分发：逐级消费；根页面直接退出（onExitRoot 内部用 exiting AtomicBoolean 防重复 dismiss）。
+    // 注意：此处不再叠加 800ms 防抖——外层 dispatchBackSafe 已有 400ms 防抖，
+    // 双层防抖会导致连续按返回时根页退出被吞，表现为"模块页无法返回微信、只能切后台"。
     BackHandler(enabled = true) {
-        val now = android.os.SystemClock.uptimeMillis()
         when {
             stack.isNotEmpty() -> {
-                lastStackPopTime = now
+                lastStackPopTime = android.os.SystemClock.uptimeMillis()
                 stack.removeAt(stack.lastIndex)
             }
             featuresQuery.isNotBlank() -> {
                 featuresQuery = ""
             }
-            else -> {
-                if (now - lastStackPopTime > 800L) {
-                    onExitRoot()
-                }
-            }
+            else -> onExitRoot()
         }
     }
 

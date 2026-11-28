@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">OKK</string>
-    <string name="xposeddescription">OKK Fuck WeChat</string>
+    <string name="app_name">Lokk</string>
+    <string name="xposeddescription">Lokk 微信全能体验增强模块</string>
     <string-array name="xposedscope">
         <item>com.tencent.mm</item>
     </string-array>

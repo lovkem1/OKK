@@ -48,50 +48,50 @@ typealias CategoryFeature = FeatureDescriptor
 object FeatureCatalog {
 
     private val chatFeatures = listOf(
-        FeatureDescriptor("anti_revoke", "防撤回", "拦截撤回指令，保留原消息与撤回标记", FeatureCategory.Chat, defaultOn = true, hasConfig = true, badge = "核心"),
-        FeatureDescriptor("block_typing_report", "禁止输入状态", "输入文字时不向对方显示“正在输入...”状态", FeatureCategory.Chat, defaultOn = true),
-        FeatureDescriptor("swipe_quote", "滑动手势引用", "消息左滑快速引用回复", FeatureCategory.Chat, defaultOn = true),
+        FeatureDescriptor("anti_revoke", "防撤回", "拦截撤回指令，保留原消息与撤回标记", FeatureCategory.Chat, defaultOn = false, hasConfig = true, badge = "核心"),
+        FeatureDescriptor("block_typing_report", "禁止输入状态", "输入文字时不向对方显示“正在输入...”状态", FeatureCategory.Chat, defaultOn = false),
+        FeatureDescriptor("swipe_quote", "滑动手势引用", "消息左滑快速引用回复", FeatureCategory.Chat, defaultOn = false),
         FeatureDescriptor("quote_delete_clear", "删除键清引用", "输入框为空时按删除键取消引用", FeatureCategory.Chat, defaultOn = false),
-        FeatureDescriptor("swipe_delete_keep", "左滑删除存记录", "会话列表左滑删除仅在列表移除，保留聊天记录", FeatureCategory.Chat, defaultOn = true),
+        FeatureDescriptor("swipe_delete_keep", "左滑删除存记录", "会话列表左滑删除仅在列表移除，保留聊天记录", FeatureCategory.Chat, defaultOn = false),
         FeatureDescriptor("edit_message", "长按修改消息", "仅修改本地显示文本，对方不可见", FeatureCategory.Chat, defaultOn = false),
         FeatureDescriptor("member_title", "群员头衔", "群昵称旁显示群主/管理员/成员徽章", FeatureCategory.Chat, defaultOn = false, hasConfig = true),
         FeatureDescriptor("real_name_tail", "实名信息", "群聊/个人聊天界面补充显示实名", FeatureCategory.Chat, defaultOn = false),
-        FeatureDescriptor("detail_enabled", "消息底部时间", "消息旁显示精细发送时间", FeatureCategory.Chat, defaultOn = true, hasConfig = true),
-        FeatureDescriptor("input_stats_enabled", "输入框统计", "输入框实时统计当日已发消息数", FeatureCategory.Chat, defaultOn = true, hasConfig = true),
-        FeatureDescriptor("chat_toolbar_enabled", "聊天工具栏", "聊天输入框+号面板自定义，重新排序或隐藏工具", FeatureCategory.Chat, defaultOn = true, hasConfig = true)
+        FeatureDescriptor("detail_enabled", "消息底部时间", "消息旁显示精细发送时间", FeatureCategory.Chat, defaultOn = false, hasConfig = true),
+        FeatureDescriptor("input_stats_enabled", "输入框统计", "输入框实时统计当日已发消息数", FeatureCategory.Chat, defaultOn = false, hasConfig = true),
+        FeatureDescriptor("chat_toolbar_enabled", "聊天工具栏", "聊天输入框+号面板自定义，重新排序或隐藏工具", FeatureCategory.Chat, defaultOn = false, hasConfig = true)
     )
 
     private val momentsFeatures = listOf(
-        FeatureDescriptor("anti_moments_delete", "朋友圈防删除", "好友动态删除后本地仍可见", FeatureCategory.Moments, defaultOn = true),
-        FeatureDescriptor("anti_moments_comment_revoke", "朋友圈评论防撤回", "对方删除评论后本地保留", FeatureCategory.Moments, defaultOn = true),
+        FeatureDescriptor("anti_moments_delete", "朋友圈防删除", "好友动态删除后本地仍可见", FeatureCategory.Moments, defaultOn = false),
+        FeatureDescriptor("anti_moments_comment_revoke", "朋友圈评论防撤回", "对方删除评论后本地保留", FeatureCategory.Moments, defaultOn = false),
         FeatureDescriptor("remove_moments_ads", "去除朋友圈广告", "自动拦截朋友圈 ADInfo 广告", FeatureCategory.Moments, defaultOn = false)
     )
 
     private val beautyFeatures = listOf(
-        FeatureDescriptor("conversation_grouping_enabled", "会话分组", "微信首页长按标签支持新建、预设标签开关、排序与编辑", FeatureCategory.Beauty, defaultOn = true, hasConfig = false),
+        FeatureDescriptor("conversation_grouping_enabled", "会话分组", "微信首页长按标签支持新建、预设标签开关、排序与编辑", FeatureCategory.Beauty, defaultOn = false, hasConfig = false),
         FeatureDescriptor(BottomTabConfig.KEY_HIDE_BAR, "默认底栏", "隐藏原生底栏标题或整个底栏", FeatureCategory.Beauty, defaultOn = false, hasConfig = true),
         FeatureDescriptor(BottomTabConfig.KEY_FLOATING, "悬浮底栏", "圆角胶囊底栏与四个自定义标题", FeatureCategory.Beauty, defaultOn = false, hasConfig = true),
-        FeatureDescriptor("floating_quick_entry", "悬浮快捷入口", "首页右下角悬浮按钮，快捷打开常用功能", FeatureCategory.Beauty, defaultOn = true, hasConfig = true),
+        FeatureDescriptor("floating_quick_entry", "悬浮快捷入口", "首页右下角悬浮按钮，快捷打开常用功能", FeatureCategory.Beauty, defaultOn = false, hasConfig = true),
         FeatureDescriptor("fold_banner_fixed", "折叠置顶固定", "固定首页折叠置顶聊天列表项", FeatureCategory.Beauty, defaultOn = false),
         FeatureDescriptor("hide_home_divider", "屏蔽首页分割线", "隐藏会话行之间的细分割线", FeatureCategory.Beauty, defaultOn = false),
-        FeatureDescriptor("conv_card_enabled", "会话列表美化", "会话左右两侧回缩边距与圆角美化", FeatureCategory.Beauty, defaultOn = true, hasConfig = true),
+        FeatureDescriptor("conv_card_enabled", "会话列表美化", "会话左右两侧回缩边距与圆角美化", FeatureCategory.Beauty, defaultOn = false, hasConfig = true),
         FeatureDescriptor("profile_id", "资料页显示 ID", "联系人与群资料页补充显示 wxid", FeatureCategory.Beauty, defaultOn = false),
-        FeatureDescriptor("home_avatar_entry", "侧边栏", "右滑开启侧边栏", FeatureCategory.Beauty, defaultOn = true),
+        FeatureDescriptor("home_avatar_entry", "侧边栏", "右滑开启侧边栏", FeatureCategory.Beauty, defaultOn = false),
         FeatureDescriptor("bubble_enabled", "气泡皮肤", "使用自定义 9.png 气泡皮肤", FeatureCategory.Beauty, defaultOn = false, hasConfig = true),
         FeatureDescriptor("round_avatar_enabled", "圆形头像", "自定义头像圆角度（方圆/全圆）", FeatureCategory.Beauty, defaultOn = false, hasConfig = true),
         FeatureDescriptor(ThemeWallpaperConfig.KEY_ENABLED, "主题壁纸", "主界面/设置背景壁纸与透明度", FeatureCategory.Beauty, defaultOn = false, hasConfig = true),
-        FeatureDescriptor("auto_dpi_scaling_enabled", "DPI 自适应", "在大屏幕或高 DPI 设备上等比例自适应缩放界面与字体", FeatureCategory.Beauty, defaultOn = true, hasConfig = false)
+        FeatureDescriptor("auto_dpi_scaling_enabled", "DPI 自适应", "在大屏幕或高 DPI 设备上等比例自适应缩放界面与字体", FeatureCategory.Beauty, defaultOn = false, hasConfig = false)
     )
 
     private val assistFeatures = listOf(
         FeatureDescriptor(CloseFriendStore.KEY_ENABLED, "密友", "长按通讯录好友行设为密友，在通讯录和主页将其隐藏", FeatureCategory.Assist, defaultOn = false, hasConfig = true),
         FeatureDescriptor("system_camera_enabled", "直调系统相机", "微信内拍照录像直接调用系统相机应用", FeatureCategory.Assist, defaultOn = false, hasConfig = false),
-        FeatureDescriptor("remove_call_limits_enabled", "移除通话限制", "突破语音视频通话时无法录音录像或占用等限制", FeatureCategory.Assist, defaultOn = true, hasConfig = false),
+        FeatureDescriptor("remove_call_limits_enabled", "移除通话限制", "突破语音视频通话时无法录音录像或占用等限制", FeatureCategory.Assist, defaultOn = false, hasConfig = false),
         FeatureDescriptor("virtual_location_enabled", "虚拟定位", "改写腾讯定位服务经纬度", FeatureCategory.Assist, defaultOn = false, hasConfig = true),
         FeatureDescriptor("auto_login_win_enabled", "PC 自动登录", "登录确认页自动勾选并提交", FeatureCategory.Assist, defaultOn = false, hasConfig = true),
-        FeatureDescriptor("disable_hot_update", "屏蔽热更新", "禁用 Tinker 补丁热更新", FeatureCategory.Assist, defaultOn = true),
-        FeatureDescriptor(DownloadRedirectHook.KEY_ENABLED, "存储重定向", "微信接收的聊天文件保存到自定义目录", FeatureCategory.Assist, defaultOn = true, hasConfig = true),
-        FeatureDescriptor(FinderVideoDownloadHook.KEY_ENABLED, "视频号下载", "视频号分享菜单添加复制链接/下载", FeatureCategory.Assist, defaultOn = true, hasConfig = true)
+        FeatureDescriptor("disable_hot_update", "屏蔽热更新", "禁用 Tinker 补丁热更新", FeatureCategory.Assist, defaultOn = false),
+        FeatureDescriptor(DownloadRedirectHook.KEY_ENABLED, "存储重定向", "微信接收的聊天文件保存到自定义目录", FeatureCategory.Assist, defaultOn = false, hasConfig = true),
+        FeatureDescriptor(FinderVideoDownloadHook.KEY_ENABLED, "视频号下载", "视频号分享菜单添加复制链接/下载", FeatureCategory.Assist, defaultOn = false, hasConfig = true)
     )
 
     private val scriptFeatures = listOf(

@@ -76,8 +76,8 @@ object SwipeDeleteKeepHook {
 
     private val settleInterpolator = DecelerateInterpolator()
 
-    fun isEnabled(): Boolean = PublicConfigStore.getBoolean(KEY, true)
-    fun isCardBeautifyEnabled(): Boolean = PublicConfigStore.getBoolean("conv_card_enabled", true)
+    fun isEnabled(): Boolean = PublicConfigStore.getBoolean(KEY, false)
+    fun isCardBeautifyEnabled(): Boolean = PublicConfigStore.getBoolean("conv_card_enabled", false)
     fun isConversationCard(view: View): Boolean = view.getTag(VIEW_TAG_CARD_APPLIED) == true
 
     fun isTouchOnConversationRow(screenX: Float, screenY: Float): Boolean {

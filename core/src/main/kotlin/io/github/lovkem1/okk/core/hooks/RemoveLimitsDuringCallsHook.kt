@@ -86,7 +86,7 @@ object RemoveLimitsDuringCallsHook {
             method.isAccessible = true
             XposedBridge.hookMethod(method, object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
-                    if (!PublicConfigStore.getBoolean("remove_call_limits_enabled", true)) return
+                    if (!PublicConfigStore.getBoolean("remove_call_limits_enabled", false)) return
                     param.result = false
                 }
             })

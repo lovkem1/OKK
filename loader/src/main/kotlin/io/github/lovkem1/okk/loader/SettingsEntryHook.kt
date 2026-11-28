@@ -2,8 +2,17 @@ package io.github.lovkem1.okk.loader
 
 import android.app.Activity
 import android.content.Context
+import android.graphics.Color
+import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
+import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
+import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.TextView
 import android.widget.Toast
 import io.github.lovkem1.okk.core.compat.DexKitSupport
 import io.github.lovkem1.okk.core.compat.ReflectCompat
@@ -33,6 +42,7 @@ object SettingsEntryHook {
     private const val TAG = "OKK-SettingsEntry"
     private const val ROW_KEY = "SettingGroup_Main_OKK"
     private const val PLUS_MENU_ID = 0x0A0C2026
+    private const val FLOATING_ENTRY_TAG = "lokk_settings_floating_entry"
 
     private val installed = AtomicBoolean(false)
     private val modernDataHookInstalled = AtomicBoolean(false)
@@ -46,6 +56,8 @@ object SettingsEntryHook {
         var n = 0
         n += hookModernSettings(classLoader, context)
         n += hookLegacySettings(classLoader)
+        // 微信设置页新增 Lokk 入口（悬浮按钮，不依赖版本敏感的 MVVM 内部列表结构）
+        n += hookSettingsActivityEntry(classLoader)
         val plusOk = hookHomePlusMenu(classLoader, context)
         n += plusOk
         xlog("settings entry hooks installed count=$n plusMenu=${if (plusOk > 0) "OK" else "FAIL"}")
@@ -694,7 +706,7 @@ object SettingsEntryHook {
         paramTypes.mapIndexed { idx, t ->
             when {
                 idx == 0 -> PLUS_MENU_ID
-                t == String::class.java && idx == 1 -> "OKK"
+                t == String::class.java && idx == 1 -> "Lokk"
                 t == String::class.java -> ""
                 t == Int::class.javaPrimitiveType || t == Int::class.java ->
                     if (idx == 3) android.R.drawable.ic_menu_manage else 0
@@ -874,6 +886,93 @@ object SettingsEntryHook {
         }
         return null
     }
+
+    // ── 设置页悬浮入口 ────────────────────────────────────────────────────
+
+    /**
+     * 在微信「我 → 设置」主页面叠加一个 Lokk 悬浮入口按钮。
+     *
+     * 8.0.79 的设置页是 setting_new MVVM 架构（SettingGroup* 列表），
+     * 强插列表项会产生空白占位（见 hookModernSettings 注释），因此改用
+     * addContentView 叠加独立按钮：不触碰内部列表结构，跨版本稳定。
+     * 点击直接打开模块设置；首页右上角加号菜单入口仍保留。
+     */
+    private fun hookSettingsActivityEntry(classLoader: ClassLoader): Int {
+        if (!PublicConfigStore.getBoolean("settings_entry_enabled", true)) {
+            xlog("settings activity entry disabled by config")
+            return 0
+        }
+        val activityClasses = listOf(
+            SettingsEntryPolicy.modernMainSettingsClass,
+            "com.tencent.mm.plugin.setting.ui.setting_new.CommonSettingsUI",
+            SettingsEntryPolicy.legacySettingsClass
+        ).distinct().mapNotNull { name ->
+            runCatching { ReflectCompat.findClass(name, classLoader) }.getOrNull()
+        }
+        if (activityClasses.isEmpty()) {
+            xlog("settings activity entry: no host class found")
+            return 0
+        }
+        var hooked = 0
+        for (clazz in activityClasses) {
+            val once = object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val activity = param.thisObject as? Activity ?: return
+                    if (activity.isFinishing) return
+                    if (markedSettingsHosts.contains(activity)) return
+                    markedSettingsHosts.add(activity)
+                    // 延迟到布局稳定后叠加，避免 onCreate 时 decorView 尚未就绪
+                    activity.window?.decorView?.post {
+                        runCatching { attachFloatingEntry(activity) }
+                            .onFailure { xlog("attach floating entry fail: ${it.message}") }
+                    }
+                }
+            }
+            runCatching {
+                XposedHelpers.findAndHookMethod(clazz, "onCreate", Bundle::class.java, once)
+                hooked++
+            }.onFailure { xlog("hook ${clazz.simpleName}.onCreate fail: ${it.message}") }
+        }
+        xlog("settings activity floating entry hooked classes=$hooked")
+        return if (hooked > 0) 1 else 0
+    }
+
+    private fun attachFloatingEntry(activity: Activity) {
+        val root = activity.window?.decorView?.findViewById<View>(android.R.id.content) as? ViewGroup ?: return
+        // 已添加则跳过（Activity 重建时 findViewById 会重新查找）
+        if (root.findViewWithTag<View>(FLOATING_ENTRY_TAG) != null) return
+
+        val density = activity.resources.displayMetrics.density
+        val sizePx = (46 * density).toInt()
+        val btn = TextView(activity).apply {
+            tag = FLOATING_ENTRY_TAG
+            text = "Lokk"
+            textSize = 13f
+            setTextColor(Color.WHITE)
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(0xE6202A35.toInt()) // 深蓝灰半透明
+                setStroke((1.5f * density).toInt(), 0x33FFFFFF)
+            }
+            isClickable = true
+            isFocusable = true
+            elevation = 6f * density
+            setOnClickListener { openSettings(activity) }
+        }
+        val lp = FrameLayout.LayoutParams(sizePx, sizePx).apply {
+            gravity = Gravity.BOTTOM or Gravity.END
+            bottomMargin = (88 * density).toInt()
+            rightMargin = (16 * density).toInt()
+        }
+        root.addView(btn, lp)
+        xlog("floating Lokk entry attached on ${activity.javaClass.simpleName}")
+    }
+
+    private val markedSettingsHosts = java.util.Collections.newSetFromMap(
+        java.util.WeakHashMap<Activity, Boolean>()
+    )
 
     // ── legacy Preference ──────────────────────────────────────────────────
 

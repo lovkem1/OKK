@@ -215,7 +215,7 @@ object ConversationGroupConfig {
         PublicConfigStore.put(KEY_SELECTED, id, async = false)
     }
 
-    fun isEnabled(): Boolean = PublicConfigStore.getBoolean(KEY_ENABLED, true)
+    fun isEnabled(): Boolean = PublicConfigStore.getBoolean(KEY_ENABLED, false)
 
     /**
      * 根据分组生成注入到 rconversation 查询的 WHERE 谓词。

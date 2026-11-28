@@ -2,7 +2,7 @@ package io.github.lovkem1.okk.core.settings
 
 object SettingsEntryPolicy {
     const val entryKey = "abc_module_settings_entry"
-    const val entryTitle = "OKK"
+    const val entryTitle = "Lokk"
     const val entrySubtitle = ""
 
     const val modernMainSettingsClass = "com.tencent.mm.plugin.setting.ui.setting_new.MainSettingsUI"

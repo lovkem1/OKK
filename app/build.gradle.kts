@@ -18,8 +18,8 @@ android {
         applicationId = "io.github.lovkem1.okk"
         minSdk = 26
         targetSdk = 37
-        versionCode = 18
-        versionName = "1.2.6"
+        versionCode = 19
+        versionName = "1.2.63"
         // 真机主流 arm64；去掉 x86 模拟器 so 减小体积
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a")

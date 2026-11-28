@@ -70,7 +70,7 @@
         <SwitchPreferenceCompat
             android:key="night_mode"
             android:title="夜间模式"
-            android:summary="仅 OKK 设置页"
+            android:summary="仅 Lokk 设置页"
             android:defaultValue="false" />
     </PreferenceCategory>
 

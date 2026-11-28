@@ -101,7 +101,7 @@ object MemberTitleHook {
     }
 
     private fun showMemberBadge(): Boolean =
-        runCatching { PublicConfigStore.getBoolean(KEY_SHOW_MEMBER, true) }.getOrDefault(true)
+        runCatching { PublicConfigStore.getBoolean(KEY_SHOW_MEMBER, false) }.getOrDefault(false)
 
     private fun resolveChatroomApis(
         context: Context,

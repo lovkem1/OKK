@@ -22,7 +22,7 @@ fun WkInjectedTheme(
     content: @Composable () -> Unit,
 ) {
     val dark = darkTheme ?: isSystemInDarkTheme()
-    val autoDpiOn = remember { PublicConfigStore.getBoolean("auto_dpi_scaling_enabled", true) }
+    val autoDpiOn = remember { PublicConfigStore.getBoolean("auto_dpi_scaling_enabled", false) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val configuration = LocalConfiguration.current
     val currentDensity = LocalDensity.current

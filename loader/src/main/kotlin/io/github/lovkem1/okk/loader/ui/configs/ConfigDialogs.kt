@@ -1448,7 +1448,7 @@ fun FloatingQuickEntryConfigDialog(onDismiss: () -> Unit) {
         }
 
         ConfigSectionLabel("图标样式")
-        listOf("grid" to "九宫格", "menu" to "菜单", "sparkle" to "星芒", "lightning" to "闪电", "logo" to "OKK").forEach { (style, name) ->
+        listOf("grid" to "九宫格", "menu" to "菜单", "sparkle" to "星芒", "lightning" to "闪电", "logo" to "Lokk").forEach { (style, name) ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

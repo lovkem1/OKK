@@ -1,17 +1,17 @@
 package io.github.lovkem1.okk.core.hooks
 
 data class AppFeatureOptions(
-    val antiRevoke: Boolean = true,
-    val revokeNotice: Boolean = true,
+    val antiRevoke: Boolean = false,
+    val revokeNotice: Boolean = false,
     /** anti_recall_keep_self：自己撤回的消息是否也拦截保留 */
-    val keepSelfRevoke: Boolean = true,
+    val keepSelfRevoke: Boolean = false,
     /** anti_recall_notice_text，变量 {name} {content} */
     val revokeNoticeTemplate: String = "{name}撤回了一条消息",
-    val mediaProtect: Boolean = true,
-    val antiMomentsDelete: Boolean = true,
-    val swipeQuote: Boolean = true,
+    val mediaProtect: Boolean = false,
+    val antiMomentsDelete: Boolean = false,
+    val swipeQuote: Boolean = false,
     val swipeRepeat: Boolean = false,
-    val customBubble: Boolean = true,
+    val customBubble: Boolean = false,
     val settingsEntry: Boolean = true
 )
 
@@ -45,18 +45,18 @@ object AppFeatureConfig {
         lastLoadTime = now
         // 微信进程优先公共 properties；XSP 常读不到
         cached = AppFeatureOptions(
-            antiRevoke = cfgBool("anti_revoke", true),
-            revokeNotice = cfgBool("revoke_notice_enabled", true),
-            keepSelfRevoke = cfgBool("anti_revoke_keep_self", true),
+            antiRevoke = cfgBool("anti_revoke", false),
+            revokeNotice = cfgBool("revoke_notice_enabled", false),
+            keepSelfRevoke = cfgBool("anti_revoke_keep_self", false),
             revokeNoticeTemplate = cfgStr(
                 "anti_revoke_notice_text",
                 "{name}撤回了一条消息"
             ),
-            mediaProtect = cfgBool("media_protect_enabled", true),
-            antiMomentsDelete = cfgBool("anti_moments_delete", true),
-            swipeQuote = cfgBool("swipe_quote", true),
+            mediaProtect = cfgBool("media_protect_enabled", false),
+            antiMomentsDelete = cfgBool("anti_moments_delete", false),
+            swipeQuote = cfgBool("swipe_quote", false),
             swipeRepeat = false,
-            customBubble = cfgBool("bubble_enabled", true),
+            customBubble = cfgBool("bubble_enabled", false),
             settingsEntry = cfgBool("settings_entry_enabled", true)
         )
         return cached

@@ -113,25 +113,25 @@ object CloseFriendStore {
     /** 主页会话隐藏生效 = 总开关开 且 子开关开 且 非临时显现 */
     fun hideConversation(): Boolean {
         if (isTempUnhidden()) return false
-        return isEnabled() && PublicConfigStore.getBoolean(KEY_HIDE_CONVERSATION, true)
+        return isEnabled() && PublicConfigStore.getBoolean(KEY_HIDE_CONVERSATION, false)
     }
 
     /** 通讯录隐藏生效 = 总开关开 且 子开关开 且 非临时显现 */
     fun hideContact(): Boolean {
         if (isTempUnhidden()) return false
-        return isEnabled() && PublicConfigStore.getBoolean(KEY_HIDE_CONTACT, true)
+        return isEnabled() && PublicConfigStore.getBoolean(KEY_HIDE_CONTACT, false)
     }
 
     /** 朋友圈隐藏生效 = 总开关开 且 子开关开 且 非临时显现 */
     fun hideSns(): Boolean {
         if (isTempUnhidden()) return false
-        return isEnabled() && PublicConfigStore.getBoolean(KEY_HIDE_SNS, true)
+        return isEnabled() && PublicConfigStore.getBoolean(KEY_HIDE_SNS, false)
     }
 
     /** 搜索隐藏生效 = 总开关开 且 子开关开 且 非临时显现 */
     fun hideSearch(): Boolean {
         if (isTempUnhidden()) return false
-        return isEnabled() && PublicConfigStore.getBoolean(KEY_HIDE_SEARCH, true)
+        return isEnabled() && PublicConfigStore.getBoolean(KEY_HIDE_SEARCH, false)
     }
 
     // ── 名单 ──

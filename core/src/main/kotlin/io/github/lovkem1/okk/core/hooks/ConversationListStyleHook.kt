@@ -131,7 +131,7 @@ object ConversationListStyleHook {
         xlog("install done")
     }
 
-    fun isEnabled(): Boolean = PublicConfigStore.getBoolean(KEY_ENABLED, true)
+    fun isEnabled(): Boolean = PublicConfigStore.getBoolean(KEY_ENABLED, false)
     fun getInsetDp(): Int = PublicConfigStore.getInt(KEY_INSET_DP, DEFAULT_INSET_DP).coerceIn(2, 24)
     fun getCornerDp(): Int = PublicConfigStore.getInt(KEY_CORNER_DP, DEFAULT_CORNER_DP).coerceIn(0, 24)
 
@@ -204,7 +204,10 @@ object ConversationListStyleHook {
             if (isThemeWallpaperActive()) {
                 list.background = null
                 list.cacheColorHint = 0
-            } else {
+            } else if (enabled) {
+                // 仅在会话美化开启时才染色。此前 enabled 取了却未用，导致关闭功能后
+                // 下拉（ACTION_DOWN → applyStyleToListView）仍把整个 decorView 染成实色，
+                // 表现为下拉触发全屏变色异常。
                 list.setBackgroundColor(parseColor)
                 list.cacheColorHint = parseColor
                 val activity = getActivity(context)

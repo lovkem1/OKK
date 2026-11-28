@@ -46,7 +46,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-private const val VERSION = "1.2.6"
+private const val VERSION = "1.2.63"
 private const val KEY_NIGHT = "night_mode"
 private const val KEY_NIGHT_FOLLOW = "night_mode_follow"
 
@@ -57,7 +57,7 @@ fun SettingsPager(onDarkChange: (Boolean) -> Unit) {
 
     // ── 外观配色 ──
     var follow by remember {
-        mutableStateOf(runCatching { PublicConfigStore.getBoolean(KEY_NIGHT_FOLLOW, true) }.getOrDefault(true))
+        mutableStateOf(runCatching { PublicConfigStore.getBoolean(KEY_NIGHT_FOLLOW, false) }.getOrDefault(false))
     }
     var forceNight by remember {
         mutableStateOf(runCatching { PublicConfigStore.getBoolean(KEY_NIGHT, false) }.getOrDefault(false))
@@ -110,7 +110,7 @@ fun SettingsPager(onDarkChange: (Boolean) -> Unit) {
                 if (!follow) {
                     SwitchPreference(
                         title = "夜间模式",
-                        summary = "手动切换 OKK 界面深浅配色",
+                        summary = "手动切换 Lokk 界面深浅配色",
                         checked = forceNight,
                         onCheckedChange = { v ->
                             forceNight = v

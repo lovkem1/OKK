@@ -80,8 +80,8 @@ object BottomTabConfig {
         cachedHideTitle = PublicConfigStore.getBoolean(KEY_HIDE_TITLE, false)
         cachedHideBar = PublicConfigStore.getBoolean(KEY_HIDE_BAR, false)
         cachedFloating = PublicConfigStore.getBoolean(KEY_FLOATING, false)
-        cachedFloatingLabels = PublicConfigStore.getBoolean(KEY_FLOATING_LABELS, true)
-        cachedFloatingBadge = PublicConfigStore.getBoolean(KEY_FLOATING_BADGE, true)
+        cachedFloatingLabels = PublicConfigStore.getBoolean(KEY_FLOATING_LABELS, false)
+        cachedFloatingBadge = PublicConfigStore.getBoolean(KEY_FLOATING_BADGE, false)
         cachedLabels = listOf(
             PublicConfigStore.getString(KEY_TITLE_CHATS, DEFAULT_LABELS[0]).ifBlank { DEFAULT_LABELS[0] },
             PublicConfigStore.getString(KEY_TITLE_CONTACTS, DEFAULT_LABELS[1]).ifBlank { DEFAULT_LABELS[1] },

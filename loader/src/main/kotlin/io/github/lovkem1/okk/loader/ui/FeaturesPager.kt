@@ -2156,13 +2156,13 @@ fun ScriptCategoryDetailScreen(onBack: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
-                    text = "🤖 OKK 智能插件 Agent",
+                    text = "🤖 Lokk 智能插件 Agent",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = MiuixTheme.colorScheme.primary
                 )
                 Text(
-                    text = "OKK 支持在微信内使用纯标准 Java / BeanShell 编写强大的增强插件，并已完美兼容 HChat 全量插件生态。\n\n你可以使用 AI 编码助手（如 ChatGPT、Claude、DeepSeek）输入开发需求，Agent 将自动为你生成包含 info.prop 和 main.java 的即用插件包！",
+                    text = "Lokk 支持在微信内使用纯标准 Java / BeanShell 编写强大的增强插件，并已完美兼容 HChat 全量插件生态。\n\n你可以使用 AI 编码助手（如 ChatGPT、Claude、DeepSeek）输入开发需求，Agent 将自动为你生成包含 info.prop 和 main.java 的即用插件包！",
                     fontSize = 13.sp,
                     color = MiuixTheme.colorScheme.onSurface,
                     lineHeight = 18.sp

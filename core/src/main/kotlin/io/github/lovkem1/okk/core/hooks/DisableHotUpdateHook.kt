@@ -54,7 +54,7 @@ object DisableHotUpdateHook {
     }
 
     fun isEnabled(): Boolean =
-        runCatching { PublicConfigStore.getBoolean(KEY, true) }.getOrDefault(true)
+        runCatching { PublicConfigStore.getBoolean(KEY, false) }.getOrDefault(false)
 
     private fun hookTinkerFlags(classLoader: ClassLoader) {
         runCatching {

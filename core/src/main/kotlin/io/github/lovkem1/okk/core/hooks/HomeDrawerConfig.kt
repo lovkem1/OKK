@@ -8,9 +8,9 @@ object HomeDrawerConfig {
     const val KEY_SHORTCUTS = "home_drawer_shortcuts"
     const val MAX_SHORTCUTS = 3
 
-    /** 侧栏签名（“OKK 快捷面板” 位置的副标题） */
+    /** 侧栏签名（“Lokk 快捷面板” 位置的副标题） */
     const val KEY_SIGNATURE = "home_drawer_signature"
-    const val DEFAULT_SIGNATURE = "OKK 快捷面板"
+    const val DEFAULT_SIGNATURE = "Lokk 快捷面板"
     const val KEY_CUSTOM_STATUS = "home_status_custom"
 
     /** 「点击编辑签名」引导是否已展示过（只引导一次，用户修改后不再显示提示） */

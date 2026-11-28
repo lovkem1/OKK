@@ -274,8 +274,8 @@ object DownloadRedirectHook {
     }
 
     fun isEnabled(): Boolean = runCatching {
-        PublicConfigStore.getBoolean(KEY_ENABLED, true)
-    }.getOrDefault(true)
+        PublicConfigStore.getBoolean(KEY_ENABLED, false)
+    }.getOrDefault(false)
 
     fun saveDir(): String = runCatching {
         PublicConfigStore.getString(KEY_DIR, DEFAULT_DIR)
